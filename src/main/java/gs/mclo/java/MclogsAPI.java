@@ -1,4 +1,4 @@
-package gs.mclo.minecraftintegration;
+package gs.mclo.java;
 
 import java.io.*;
 import java.net.HttpURLConnection;

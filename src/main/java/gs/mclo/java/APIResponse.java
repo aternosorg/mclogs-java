@@ -1,4 +1,4 @@
-package gs.mclo.minecraftintegration;
+package gs.mclo.java;
 
 import com.google.gson.Gson;
 
