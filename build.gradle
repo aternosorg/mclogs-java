@@ -4,8 +4,8 @@ plugins {
     id 'maven-publish'
 }
 
-group = 'gs.mclo.minecraftintegration'
-version = '1.0.0'
+group = 'gs.mclo.java'
+version = '1.0.1'
 
 repositories {
     // Use JCenter for resolving dependencies.
