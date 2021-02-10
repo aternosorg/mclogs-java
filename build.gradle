@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'gs.mclo.java'
-version = '1.0.1'
+version = '1.0.2'
 
 repositories {
     // Use JCenter for resolving dependencies.
@@ -16,7 +16,7 @@ dependencies {
     // Use JUnit test framework.
     testImplementation 'junit:junit:4.13'
 
-    implementation 'com.google.code.gson:gson:2.8.6'
+    compileOnly 'com.google.code.gson:gson:2.8.6'
 }
 
 jar {
