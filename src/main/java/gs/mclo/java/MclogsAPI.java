@@ -6,8 +6,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 
 public class MclogsAPI {
     public static String mcversion = "unknown";
@@ -56,17 +55,12 @@ public class MclogsAPI {
     public static String[] listLogs(String rundir){
         File logdir = new File(rundir + "/logs");
 
-        String[] logs = logdir.list();
-        if (logs == null)
-            logs = new String[0];
+        String[] files = logdir.list();
+        if (files == null)
+            files = new String[0];
 
-        ArrayList<String> logsList = new ArrayList<>();
-        for (String log:logs) {
-            if (log.endsWith(".log")||log.endsWith(".log.gz"))
-                logsList.add(log);
-        }
-
-        Collections.sort(logsList);
-        return logsList.toArray(new String[0]);
+        return Arrays.stream(files)
+                .filter(file -> file.endsWith(".log") || file.endsWith(".log.gz"))
+                .toArray(String[]::new);
     }
 }
