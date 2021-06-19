@@ -8,35 +8,20 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.zip.GZIPInputStream;
 
 public class MclogsAPI {
     public static String mcversion = "unknown";
     public static String userAgent = "unknown";
     public static String version = "unknown";
 
-    private static String inputStreamToString (InputStream is) throws IOException {
-        BufferedReader buf = new BufferedReader(new InputStreamReader(is));
-        String line = buf.readLine();
-        StringBuilder sb = new StringBuilder();
-        while (line != null) {
-            sb.append(line).append("\n");
-            line = buf.readLine();
-        }
-        return sb.toString();
-    }
-
-    public static APIResponse share(String file) throws IOException {
-        //read log
-        InputStream LogIS = new FileInputStream(new File(file));
-
-        //decompress log
-        if (file.endsWith(".gz")) {
-            LogIS = new GZIPInputStream(LogIS);
-        }
-
-        //read log to string
-        String log = inputStreamToString(LogIS);
+    /**
+     * share a log to the mclogs API
+     * @param path file path
+     * @return mclogs response
+     * @throws IOException error reading/sharing file
+     */
+    public static APIResponse share(String path) throws IOException {
+        Log log = new Log(path);
 
         //connect to api
         URL url = new URL("https://api.mclo.gs/1/log");
@@ -46,7 +31,7 @@ public class MclogsAPI {
         http.setDoOutput(true);
 
         //convert log to application/x-www-form-urlencoded
-        String content = "content=" + URLEncoder.encode(log, StandardCharsets.UTF_8.toString());
+        String content = "content=" + URLEncoder.encode(log.getContent(), StandardCharsets.UTF_8.toString());
         byte[] out = content.getBytes(StandardCharsets.UTF_8);
         int length = out.length;
 
@@ -60,11 +45,15 @@ public class MclogsAPI {
         }
 
         //handle response
-        return APIResponse.parse(inputStreamToString(http.getInputStream()));
+        return APIResponse.parse(Util.inputStreamToString(http.getInputStream()));
     }
 
+    /**
+     * list logs in a directory
+     * @param rundir server/client directory
+     * @return log file names
+     */
     public static String[] listLogs(String rundir){
-
         File logdir = new File(rundir + "/logs");
 
         String[] logs = logdir.list();
