@@ -53,7 +53,7 @@ public class MclogsAPI {
      * @return log file names
      */
     public static String[] listLogs(String rundir){
-        File logdir = new File(rundir + "/logs");
+        File logdir = new File(rundir, "logs");
 
         String[] files = logdir.list();
         if (files == null)
