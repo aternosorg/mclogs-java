@@ -24,13 +24,18 @@ public class Log {
 
     /**
      * create a new log
-     * @param path path to a log file
+     * @param dir logs directory
+     * @param file log file name
      * @throws IOException errors loading log
      */
-    public Log(String path) throws IOException {
-        InputStream in = new FileInputStream(path);
+    public Log(String dir, String file) throws IOException {
+        File logs = new File(dir);
+        File log = new File(logs, file);
 
-        if (path.endsWith(".gz")) {
+        if (!log.getParentFile().equals(logs) || !file.matches(".*\\.log(\\.gz)?")) throw new FileNotFoundException();
+
+        InputStream in = new FileInputStream(log);
+        if (file.endsWith(".gz")) {
             in = new GZIPInputStream(in);
         }
 

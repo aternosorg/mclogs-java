@@ -15,12 +15,13 @@ public class MclogsAPI {
 
     /**
      * share a log to the mclogs API
-     * @param path file path
+     * @param dir logs directory
+     * @param file log file name
      * @return mclogs response
      * @throws IOException error reading/sharing file
      */
-    public static APIResponse share(String path) throws IOException {
-        Log log = new Log(path);
+    public static APIResponse share(String dir, String file) throws IOException {
+        Log log = new Log(dir, file);
 
         //connect to api
         URL url = new URL("https://api.mclo.gs/1/log");

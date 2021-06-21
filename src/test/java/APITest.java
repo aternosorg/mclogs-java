@@ -2,6 +2,8 @@ import gs.mclo.java.APIResponse;
 import gs.mclo.java.MclogsAPI;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
@@ -22,7 +24,7 @@ public class APITest {
     @Test
     void shareLog() {
         assertDoesNotThrow(() -> {
-            APIResponse response = MclogsAPI.share("src/test/resources/logs/one.log");
+            APIResponse response = MclogsAPI.share("src/test/resources/logs", "one.log");
             assertTrue(response.success);
             assertNotNull(response.id);
             assertNotNull(response.url);
@@ -30,5 +32,28 @@ public class APITest {
 
             System.out.println("Test log has been shared at " + response.url);
         });
+    }
+
+    @Test
+    void shareGzipLog() {
+        assertDoesNotThrow(() -> {
+            APIResponse response = MclogsAPI.share("src/test/resources/logs", "three.log.gz");
+            assertTrue(response.success);
+            assertNotNull(response.id);
+            assertNotNull(response.url);
+            assertNull(response.error);
+
+            System.out.println("Gzip test log has been shared at " + response.url);
+        });
+    }
+
+    @Test
+    void shareSecretLog() {
+        assertThrows(FileNotFoundException.class, () -> MclogsAPI.share("src/test/resources/logs", "../secret.log"));
+    }
+
+    @Test
+    void shareSecretFile() {
+        assertThrows(FileNotFoundException.class, () -> MclogsAPI.share("src/test/resources/logs", "secret.secret"));
     }
 }
