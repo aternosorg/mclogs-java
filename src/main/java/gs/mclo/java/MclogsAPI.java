@@ -12,6 +12,7 @@ public class MclogsAPI {
     public static String mcversion = "unknown";
     public static String userAgent = "unknown";
     public static String version = "unknown";
+    private static String apiHost = "api.mclo.gs";
 
     /**
      * share a log to the mclogs API
@@ -24,7 +25,7 @@ public class MclogsAPI {
         Log log = new Log(dir, file);
 
         //connect to api
-        URL url = new URL("https://api.mclo.gs/1/log");
+        URL url = new URL("https://"+apiHost+"/1/log");
         URLConnection con = url.openConnection();
         HttpURLConnection http = (HttpURLConnection) con;
         http.setRequestMethod("POST");
@@ -63,5 +64,19 @@ public class MclogsAPI {
         return Arrays.stream(files)
                 .filter(file -> file.endsWith(".log") || file.endsWith(".log.gz"))
                 .toArray(String[]::new);
+    }
+
+    /**
+     * @return api host URL
+     */
+    public static String getApiHost() {
+        return apiHost;
+    }
+
+    /**
+     * @param apiHost api host url
+     */
+    public static void setApiHost(String apiHost) {
+        if (apiHost != null && apiHost.length() > 0) MclogsAPI.apiHost = apiHost;
     }
 }
