@@ -92,6 +92,7 @@ public class MclogsAPI {
      * @param protocol protocol
      */
     public static void setProtocol(String protocol) {
+        if (protocol == null) return;
         switch (protocol) {
             case "http":
             case "https":
