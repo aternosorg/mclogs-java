@@ -13,6 +13,7 @@ public class MclogsAPI {
     public static String userAgent = "unknown";
     public static String version = "unknown";
     private static String apiHost = "api.mclo.gs";
+    private static String protocol = "https";
 
     /**
      * share a log to the mclogs API
@@ -25,7 +26,7 @@ public class MclogsAPI {
         Log log = new Log(dir, file);
 
         //connect to api
-        URL url = new URL("https://"+apiHost+"/1/log");
+        URL url = new URL(protocol + "://" + apiHost + "/1/log");
         URLConnection con = url.openConnection();
         HttpURLConnection http = (HttpURLConnection) con;
         http.setRequestMethod("POST");
@@ -78,5 +79,24 @@ public class MclogsAPI {
      */
     public static void setApiHost(String apiHost) {
         if (apiHost != null && apiHost.length() > 0) MclogsAPI.apiHost = apiHost;
+    }
+
+    /**
+     * @return protocol
+     */
+    public static String getProtocol() {
+        return protocol;
+    }
+
+    /**
+     * @param protocol protocol
+     */
+    public static void setProtocol(String protocol) {
+        switch (protocol) {
+            case "http":
+            case "https":
+                MclogsAPI.protocol = protocol;
+                break;
+        }
     }
 }
