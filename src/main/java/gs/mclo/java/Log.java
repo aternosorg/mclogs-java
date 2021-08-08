@@ -3,6 +3,7 @@ package gs.mclo.java;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
@@ -69,7 +70,7 @@ public class Log {
      */
     @Deprecated
     public Log(String dir, String file) throws IOException {
-        Log log = new Log(Path.of(dir).resolve(file));
+        Log log = new Log(Paths.get(dir).resolve(file));
         this.content = log.content;
     }
 
@@ -86,7 +87,7 @@ public class Log {
      */
     private void filterIPv4() {
         Matcher matcher = IPV4_PATTERN.matcher(this.content);
-        StringBuilder sb = new StringBuilder();
+        StringBuffer sb = new StringBuffer();
         while (matcher.find()) {
             matcher.appendReplacement(sb, matcher.group().replaceAll("[0-9]", "*"));
         }
@@ -99,7 +100,7 @@ public class Log {
      */
     private void filterIPv6() {
         Matcher matcher = IPV6_PATTERN.matcher(this.content);
-        StringBuilder sb = new StringBuilder();
+        StringBuffer sb = new StringBuffer();
         while (matcher.find()) {
             matcher.appendReplacement(sb, matcher.group().replaceAll("[0-9a-fA-F]", "*"));
         }

@@ -7,6 +7,7 @@ import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 
 public class MclogsAPI {
@@ -68,7 +69,7 @@ public class MclogsAPI {
      */
     @Deprecated
     public static APIResponse share(String dir, String file) throws IOException {
-        return share(Path.of(dir).resolve(file));
+        return share(Paths.get(dir).resolve(file));
     }
 
     /**
