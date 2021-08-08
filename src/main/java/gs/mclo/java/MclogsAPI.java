@@ -66,6 +66,7 @@ public class MclogsAPI {
      * @throws IOException error reading/sharing file
      * @deprecated Use {@link MclogsAPI#share(Log)} or {@link MclogsAPI#share(Path)} instead
      */
+    @Deprecated
     public static APIResponse share(String dir, String file) throws IOException {
         return share(Path.of(dir).resolve(file));
     }

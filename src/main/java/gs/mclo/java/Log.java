@@ -67,6 +67,7 @@ public class Log {
      * @throws IOException If an exception occurs while reading the logFile
      * @deprecated Use {@link Log#Log(Path)} instead
      */
+    @Deprecated
     public Log(String dir, String file) throws IOException {
         Log log = new Log(Path.of(dir).resolve(file));
         this.content = log.content;
