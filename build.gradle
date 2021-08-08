@@ -4,6 +4,8 @@ plugins {
     id 'maven-publish'
 }
 
+sourceCompatibility = 16
+
 group = 'gs.mclo.java'
 version = '2.0.0'
 
