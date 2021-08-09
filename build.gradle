@@ -8,8 +8,7 @@ group = 'gs.mclo.java'
 version = '2.0.0'
 
 repositories {
-    // Use JCenter for resolving dependencies.
-    jcenter()
+    mavenCentral()
 }
 
 dependencies {
@@ -33,7 +32,7 @@ jar {
 
 publishing {
     publications {
-        MclogsMinecraftIntegration(MavenPublication) {
+        MclogsJava(MavenPublication) {
             from components.java
         }
     }
