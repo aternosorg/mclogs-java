@@ -34,8 +34,8 @@ public class Log {
         if (!Files.exists(logFile)) {
             throw new FileNotFoundException("Log file does not exist!");
         }
-        if (!Files.isDirectory(logFile)) {
-            throw new IllegalArgumentException("Log file must be a file, not a directory!");
+        if (Files.isDirectory(logFile)) {
+            throw new IllegalArgumentException("Path '" + logFile + "' is a directory, not a file!");
         }
         if (!logFile.getFileName().toString().matches(".*\\.log(\\.0)?(\\.gz)?")) {
             throw new IllegalArgumentException("Log file must have a `.log` file extension. It may be suffixed by both `.0` and `.gz`");
