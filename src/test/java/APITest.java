@@ -49,6 +49,6 @@ public class APITest {
 
     @Test
     void shareSecretFile() {
-        assertThrows(FileNotFoundException.class, () -> MclogsAPI.share(Paths.get("src/test/resources/logs/secret.secret")));
+        assertThrows(IllegalArgumentException.class, () -> MclogsAPI.share(Paths.get("src/test/resources/logs/secret.secret")));
     }
 }
