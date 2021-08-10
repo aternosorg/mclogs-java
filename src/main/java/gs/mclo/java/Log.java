@@ -18,7 +18,7 @@ public class Log {
     /**
      * pattern for IPv4 addresses
      */
-    private static final Pattern IPV4_PATTERN = Pattern.compile("(?:[1-2]?[0-9]{1,2}\\.){3}[1-2]?[0-9]{1,2}");
+    private static final Pattern IPV4_PATTERN = Pattern.compile("(?<!([0-9]|-|\\w))(?:[1-2]?[0-9]{1,2}\\.){3}[1-2]?[0-9]{1,2}(?!([0-9]|-|\\w))");
 
     /**
      * whitelist patterns for IPv4 addresses
@@ -31,16 +31,16 @@ public class Log {
     };
 
     /**
+     * pattern for IPv6 addresses
+     */
+    private static final Pattern IPV6_PATTERN = Pattern.compile("(?<!([0-9]|-|\\w))(?:[0-9a-f]{0,4}:){7}[0-9a-f]{0,4}(?!([0-9]|-|\\w))", Pattern.CASE_INSENSITIVE);
+
+    /**
      * whitelist patterns for IPv4 addresses
      */
     private static final Pattern[] IPV6_FILTER = new Pattern[]{
             Pattern.compile("[0:]+1?"),
     };
-
-    /**
-     * pattern for IPv6 addresses
-     */
-    private static final Pattern IPV6_PATTERN = Pattern.compile("(?:[0-9a-f]{0,4}:){7}[0-9a-f]{0,4}%", Pattern.CASE_INSENSITIVE);
 
     /**
      * Create a new Log
