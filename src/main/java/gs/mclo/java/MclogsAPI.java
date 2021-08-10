@@ -6,6 +6,8 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 
 public class MclogsAPI {
@@ -17,14 +19,11 @@ public class MclogsAPI {
 
     /**
      * share a log to the mclogs API
-     * @param dir logs directory
-     * @param file log file name
-     * @return mclogs response
-     * @throws IOException error reading/sharing file
+     * @param log The {@link Log} to share
+     * @return mclogs {@link APIResponse}
+     * @throws IOException error sharing the log content
      */
-    public static APIResponse share(String dir, String file) throws IOException {
-        Log log = new Log(dir, file);
-
+    public static APIResponse share(Log log) throws IOException {
         //connect to api
         URL url = new URL(protocol + "://" + apiHost + "/1/log");
         URLConnection con = url.openConnection();
@@ -48,6 +47,29 @@ public class MclogsAPI {
 
         //handle response
         return APIResponse.parse(Util.inputStreamToString(http.getInputStream()));
+    }
+
+    /**
+     * share a log to the mclogs API
+     * @param logFile The log file, which must have a file extension of '.log'. The file extension may be suffixed by both `.0` and `.gz`
+     * @return mclogs {@link APIResponse}
+     * @throws IOException error reading/sharing file
+     */
+    public static APIResponse share(Path logFile) throws IOException {
+        return share(new Log(logFile));
+    }
+
+    /**
+     * share a log to the mclogs API
+     * @param dir The parent directory of the log file
+     * @param file The log file, which must have a file extension of '.log'. The file extension may be suffixed by both `.0` and `.gz`
+     * @return mclogs {@link APIResponse}
+     * @throws IOException error reading/sharing file
+     * @deprecated Use {@link MclogsAPI#share(Log)} or {@link MclogsAPI#share(Path)} instead
+     */
+    @Deprecated
+    public static APIResponse share(String dir, String file) throws IOException {
+        return share(Paths.get(dir).resolve(file));
     }
 
     /**
