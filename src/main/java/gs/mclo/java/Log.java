@@ -18,6 +18,23 @@ public class Log {
     private static final Pattern IPV4_PATTERN = Pattern.compile("(?:[1-2]?[0-9]{1,2}\\.){3}[1-2]?[0-9]{1,2}");
 
     /**
+     * whitelist patterns for IPv4 addresses
+     */
+    private static final Pattern[] IPV4_FILTER = new Pattern[]{
+            Pattern.compile("127\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}"),
+            Pattern.compile("0\\.0\\.0\\.0"),
+            Pattern.compile("1\\.[01]\\.[01]\\.1"),
+            Pattern.compile("8\\.8\\.[84]\\.[84]"),
+    };
+
+    /**
+     * whitelist patterns for IPv4 addresses
+     */
+    private static final Pattern[] IPV6_FILTER = new Pattern[]{
+            Pattern.compile("[0:]+1?"),
+    };
+
+    /**
      * pattern for IPv6 addresses
      */
     private static final Pattern IPV6_PATTERN = Pattern.compile("(?:[0-9a-f]{0,4}:){7}[0-9a-f]{0,4}%", Pattern.CASE_INSENSITIVE);
@@ -58,10 +75,27 @@ public class Log {
         Matcher matcher = IPV4_PATTERN.matcher(this.content);
         StringBuffer sb = new StringBuffer();
         while (matcher.find()) {
-            matcher.appendReplacement(sb, matcher.group().replaceAll("[0-9]", "*"));
+            if (isWhitelistedIPv4(matcher.group())) {
+                continue;
+            }
+            matcher.appendReplacement(sb, "**.**.**.**");
         }
         matcher.appendTail(sb);
         this.content = sb.toString();
+    }
+
+    /**
+     * does this IPv4 address match any whitelist filters
+     * @param s string to test
+     * @return matches
+     */
+    private boolean isWhitelistedIPv4(String s) {
+        for (Pattern filter: IPV4_FILTER) {
+            if (s.matches(filter.pattern())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -71,10 +105,27 @@ public class Log {
         Matcher matcher = IPV6_PATTERN.matcher(this.content);
         StringBuffer sb = new StringBuffer();
         while (matcher.find()) {
-            matcher.appendReplacement(sb, matcher.group().replaceAll("[0-9a-fA-F]", "*"));
+            if (isWhitelistedIPv6(matcher.group())) {
+                continue;
+            }
+            matcher.appendReplacement(sb, "****:****:****:****:****:****:****:****");
         }
         matcher.appendTail(sb);
         this.content = sb.toString();
+    }
+
+    /**
+     * does this IPv6 address match any whitelist filters
+     * @param s string to test
+     * @return matches
+     */
+    private boolean isWhitelistedIPv6(String s) {
+        for (Pattern filter: IPV6_FILTER) {
+            if (s.matches(filter.pattern())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
