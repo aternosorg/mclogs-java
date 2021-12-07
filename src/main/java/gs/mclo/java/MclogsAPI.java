@@ -3,7 +3,6 @@ package gs.mclo.java;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -26,10 +25,9 @@ public class MclogsAPI {
     public static APIResponse share(Log log) throws IOException {
         //connect to api
         URL url = new URL(protocol + "://" + apiHost + "/1/log");
-        URLConnection con = url.openConnection();
-        HttpURLConnection http = (HttpURLConnection) con;
-        http.setRequestMethod("POST");
-        http.setDoOutput(true);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("POST");
+        connection.setDoOutput(true);
 
         //convert log to application/x-www-form-urlencoded
         String content = "content=" + URLEncoder.encode(log.getContent(), StandardCharsets.UTF_8.toString());
@@ -37,16 +35,16 @@ public class MclogsAPI {
         int length = out.length;
 
         //send log to api
-        http.setFixedLengthStreamingMode(length);
-        http.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-        http.setRequestProperty("User-Agent", userAgent + "/" + version + "/" + mcversion);
-        http.connect();
-        try (OutputStream os = http.getOutputStream()) {
+        connection.setFixedLengthStreamingMode(length);
+        connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+        connection.setRequestProperty("User-Agent", userAgent + "/" + version + "/" + mcversion);
+        connection.connect();
+        try (OutputStream os = connection.getOutputStream()) {
             os.write(out);
         }
 
         //handle response
-        return APIResponse.parse(Util.inputStreamToString(http.getInputStream()));
+        return APIResponse.parse(Util.inputStreamToString(connection.getInputStream()));
     }
 
     /**
@@ -73,6 +71,26 @@ public class MclogsAPI {
     }
 
     /**
+     * get the raw log contents
+     * @param id log id
+     * @return log content
+     * @throws IOException connection error
+     */
+    public static String get(String id) throws IOException {
+        if (id == null) {
+            throw new IllegalArgumentException("No ID provided!");
+        }
+        URL url = new URL(protocol + "://" + apiHost + "/1/raw/" + id);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+        connection.setRequestMethod("GET");
+        connection.setRequestProperty("Content-Type", "application/json");
+
+        connection.connect();
+        return Util.inputStreamToString(connection.getInputStream());
+    }
+
+    /**
      * list logs in a directory
      * @param rundir server/client directory
      * @return log file names
@@ -86,6 +104,7 @@ public class MclogsAPI {
 
         return Arrays.stream(files)
                 .filter(file -> file.endsWith(".log") || file.endsWith(".log.gz"))
+                .sorted()
                 .toArray(String[]::new);
     }
 
