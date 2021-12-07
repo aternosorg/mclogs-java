@@ -59,7 +59,7 @@ public class Log {
         }
 
         InputStream in = Files.newInputStream(logFile);
-        if (logFile.endsWith(".gz")) {
+        if (logFile.getFileName().toString().endsWith(".gz")) {
             in = new GZIPInputStream(in);
         }
 
