@@ -44,7 +44,7 @@ public class Log {
 
     /**
      * Create a new Log
-     * @param logFile The log file, which must have a file extension of '.log'. The file extension may be suffixed by both `.0` and `.gz`
+     * @param logFile The log file, which must have a file extension of '.log' or '.txt'. The file extension may be suffixed by both `.0` and `.gz`
      * @throws IOException If an exception occurs while reading the logFile
      */
     public Log(Path logFile) throws IOException {
@@ -54,8 +54,8 @@ public class Log {
         if (Files.isDirectory(logFile)) {
             throw new IllegalArgumentException("Path '" + logFile + "' is a directory, not a file!");
         }
-        if (!logFile.getFileName().toString().matches(".*\\.log(\\.0)?(\\.gz)?")) {
-            throw new IllegalArgumentException("Log file must have a `.log` file extension. It may be suffixed by both `.0` and `.gz`");
+        if (!logFile.getFileName().toString().matches(".*\\.(log|txt)(\\.0)?(\\.gz)?")) {
+            throw new IllegalArgumentException("Log file must have a `.log` or `.txt` file extension. It may be suffixed by both `.0` and `.gz`");
         }
 
         InputStream in = Files.newInputStream(logFile);
@@ -81,7 +81,7 @@ public class Log {
     /**
      * Create a new Log
      * @param dir The parent directory of the log file
-     * @param file The log file, which must have a file extension of '.log'. The file extension may be suffixed by both `.0` and `.gz`
+     * @param file The log file, which must have a file extension of '.log' or '.txt'. The file extension may be suffixed by both `.0` and `.gz`
      * @throws IOException If an exception occurs while reading the logFile
      * @deprecated Use {@link Log#Log(Path)} instead
      */
