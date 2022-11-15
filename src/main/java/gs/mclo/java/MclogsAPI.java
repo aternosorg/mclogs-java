@@ -92,18 +92,43 @@ public class MclogsAPI {
 
     /**
      * list logs in a directory
-     * @param rundir server/client directory
+     * @param directory server/client directory
      * @return log file names
      */
-    public static String[] listLogs(String rundir){
-        File logdir = new File(rundir, "logs");
+    public static String[] listLogs(String directory){
+        File logsDirectory = new File(directory, "logs");
 
-        String[] files = logdir.list();
+        if (!logsDirectory.exists()) {
+            return new String[0];
+        }
+
+        String[] files = logsDirectory.list();
         if (files == null)
             files = new String[0];
 
         return Arrays.stream(files)
                 .filter(file -> file.endsWith(".log") || file.endsWith(".log.gz"))
+                .sorted()
+                .toArray(String[]::new);
+    }
+
+    /**
+     * list crash reports in a directory
+     * @param directory server/client directory
+     * @return log file names
+     */
+    public static String[] listCrashReports(String directory){
+        File crashReportDirectory = new File(directory, "crash-reports");
+
+        if (!crashReportDirectory.exists()) {
+            return new String[0];
+        }
+
+        String[] files = crashReportDirectory.list();
+        if (files == null)
+            files = new String[0];
+
+        return Arrays.stream(files)
                 .sorted()
                 .toArray(String[]::new);
     }
