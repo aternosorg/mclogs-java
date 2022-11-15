@@ -107,7 +107,7 @@ public class MclogsAPI {
             files = new String[0];
 
         return Arrays.stream(files)
-                .filter(file -> file.endsWith(".log") || file.endsWith(".log.gz"))
+                .filter(file -> file.matches(Log.ALLOWED_FILE_NAME_PATTERN.pattern()))
                 .sorted()
                 .toArray(String[]::new);
     }
@@ -129,6 +129,7 @@ public class MclogsAPI {
             files = new String[0];
 
         return Arrays.stream(files)
+                .filter(file -> file.matches(Log.ALLOWED_FILE_NAME_PATTERN.pattern()))
                 .sorted()
                 .toArray(String[]::new);
     }

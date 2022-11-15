@@ -13,17 +13,17 @@ public class Log {
     /**
      * log content
      */
-    private String content;
+    protected String content;
 
     /**
      * pattern for IPv4 addresses
      */
-    private static final Pattern IPV4_PATTERN = Pattern.compile("(?<!([0-9]|-|\\w))(?:[1-2]?[0-9]{1,2}\\.){3}[1-2]?[0-9]{1,2}(?!([0-9]|-|\\w))");
+    public static final Pattern IPV4_PATTERN = Pattern.compile("(?<!([0-9]|-|\\w))(?:[1-2]?[0-9]{1,2}\\.){3}[1-2]?[0-9]{1,2}(?!([0-9]|-|\\w))");
 
     /**
      * whitelist patterns for IPv4 addresses
      */
-    private static final Pattern[] IPV4_FILTER = new Pattern[]{
+    public static final Pattern[] IPV4_FILTER = new Pattern[]{
             Pattern.compile("127\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}"),
             Pattern.compile("0\\.0\\.0\\.0"),
             Pattern.compile("1\\.[01]\\.[01]\\.1"),
@@ -33,14 +33,19 @@ public class Log {
     /**
      * pattern for IPv6 addresses
      */
-    private static final Pattern IPV6_PATTERN = Pattern.compile("(?<!([0-9]|-|\\w))(?:[0-9a-f]{0,4}:){7}[0-9a-f]{0,4}(?!([0-9]|-|\\w))", Pattern.CASE_INSENSITIVE);
+    public static final Pattern IPV6_PATTERN = Pattern.compile("(?<!([0-9]|-|\\w))(?:[0-9a-f]{0,4}:){7}[0-9a-f]{0,4}(?!([0-9]|-|\\w))", Pattern.CASE_INSENSITIVE);
 
     /**
      * whitelist patterns for IPv4 addresses
      */
-    private static final Pattern[] IPV6_FILTER = new Pattern[]{
+    public static final Pattern[] IPV6_FILTER = new Pattern[]{
             Pattern.compile("[0:]+1?"),
     };
+
+    /**
+     * Only allow logs with the file extension `.log` or `.txt` (can be suffixed by both `.0` and `.gz` in that order)
+     */
+    public static final Pattern ALLOWED_FILE_NAME_PATTERN = Pattern.compile(".*\\.(log|txt)(\\.0)?(\\.gz)?");
 
     /**
      * Create a new Log
@@ -54,7 +59,7 @@ public class Log {
         if (Files.isDirectory(logFile)) {
             throw new IllegalArgumentException("Path '" + logFile + "' is a directory, not a file!");
         }
-        if (!logFile.getFileName().toString().matches(".*\\.(log|txt)(\\.0)?(\\.gz)?")) {
+        if (!logFile.getFileName().toString().matches(ALLOWED_FILE_NAME_PATTERN.pattern())) {
             throw new IllegalArgumentException("Log file must have a `.log` or `.txt` file extension. It may be suffixed by both `.0` and `.gz`");
         }
 
