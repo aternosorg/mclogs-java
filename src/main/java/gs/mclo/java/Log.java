@@ -174,7 +174,8 @@ public class Log {
      * limit the log length to 10 MB
      */
     private void filterLength() {
-        this.content = this.content.trim().substring(0, MAX_LOG_LENGTH);
+        this.content = this.content.trim();
+        this.content = this.content.substring(0, Math.min(this.content.length(), MAX_LOG_LENGTH));
     }
 
     /**
