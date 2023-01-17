@@ -48,6 +48,11 @@ public class Log {
     public static final Pattern ALLOWED_FILE_NAME_PATTERN = Pattern.compile(".*\\.(log|txt)(\\.0)?(\\.gz)?");
 
     /**
+     * Maximum length of log files that can be uploaded in bytes
+     */
+    public static final int MAX_LOG_LENGTH = 10 * 1024 * 1024;
+
+    /**
      * Create a new Log
      * @param logFile The log file, which must have a file extension of '.log' or '.txt'. The file extension may be suffixed by both `.0` and `.gz`
      * @throws IOException If an exception occurs while reading the logFile
@@ -102,6 +107,7 @@ public class Log {
     private void filter() {
         filterIPv4();
         filterIPv6();
+        filterLength();
     }
 
     /**
@@ -162,6 +168,13 @@ public class Log {
             }
         }
         return false;
+    }
+
+    /**
+     * limit the log length to 10 MB
+     */
+    private void filterLength() {
+        this.content = this.content.trim().substring(0, MAX_LOG_LENGTH);
     }
 
     /**
