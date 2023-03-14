@@ -7,7 +7,7 @@ plugins {
 sourceCompatibility = 8
 targetCompatibility = 8
 
-group = 'gs.mclo.java'
+group = 'gs.mclo'
 version = project.findProperty("release") ?: "dev"
 ext.isReleaseVersion = version != "dev" &&  !version.endsWith("SNAPSHOT")
 
