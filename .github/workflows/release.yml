@@ -21,10 +21,10 @@ jobs:
         run: ./gradlew test -Prelease=${{  github.ref_name }}
       - name: Publish to Maven Central
         env:
-          ATERNOS_GPG_SIGNING_KEY: ${{ secrets.ATERNOS_GPG_SIGNING_KEY }}
-          ATERNOS_GPG_SIGNING_PASSPHRASE: ${{ secrets.ATERNOS_GPG_SIGNING_PASSPHRASE }}
-          OSSRH_USERNAME: ${{ secrets.SONATYPE_OSSRH_USERNAME }}
-          OSSRH_PASSWORD: ${{ secrets.SONATYPE_OSSRH_PASSWORD }}
+          ORG_GRADLE_PROJECT_SIGNING_KEY: ${{ secrets.ATERNOS_GPG_SIGNING_KEY }}
+          ORG_GRADLE_PROJECT_SIGNING_PASSPHRASE: ${{ secrets.ATERNOS_GPG_SIGNING_PASSPHRASE }}
+          ORG_GRADLE_PROJECT_OSSRH_USERNAME: ${{ secrets.SONATYPE_OSSRH_USERNAME }}
+          ORG_GRADLE_PROJECT_OSSRH_PASSWORD: ${{ secrets.SONATYPE_OSSRH_PASSWORD }}
         run: ./gradlew publish -Prelease=${{ github.ref_name }}
       - name: Create Release
         uses: softprops/action-gh-release@v1

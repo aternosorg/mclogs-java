@@ -76,8 +76,8 @@ publishing {
             def snapshotRepo = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
             url = isReleaseVersion ? releaseRepo : snapshotRepo
             credentials {
-                username = findProperty('ossrhUsername')
-                password = findProperty('ossrhPassword')
+                username = findProperty('OSSRH_USERNAME')
+                password = findProperty('OSSRH_PASSWORD')
             }
         }
     }
