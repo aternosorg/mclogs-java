@@ -1,14 +1,15 @@
 plugins {
-    // Apply the java-library plugin for API and implementation separation.
     id 'java-library'
     id 'maven-publish'
+    id 'signing'
 }
 
 sourceCompatibility = 8
 targetCompatibility = 8
 
 group = 'gs.mclo.java'
-version = '2.2.0'
+version = project.findProperty("release") ?: "dev"
+ext.isReleaseVersion = version != "dev" &&  !version.endsWith("SNAPSHOT")
 
 repositories {
     mavenCentral()
@@ -28,6 +29,11 @@ test {
     }
 }
 
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
 jar {
     from sourceSets.main.allSource
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
@@ -35,12 +41,55 @@ jar {
 
 publishing {
     publications {
-        MclogsJava(MavenPublication) {
+        mavenJava(MavenPublication) {
+            artifactId = 'java'
             from components.java
+            pom {
+                name = 'mclo.gs API'
+                description = 'The official java library for the mclo.gs API'
+                url = 'https://github.com/aternosorg/mclogs-java'
+                licenses {
+                    license {
+                        name = 'MIT'
+                        url = 'https://github.com/aternosorg/mclogs-java/blob/master/LICENSE'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'julian'
+                        name = 'Julian Vennen'
+                        email = 'julian@aternos.org'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:https://github.com/aternosorg/mclogs-java.git'
+                    developerConnection = 'scm:git:git@github.com:aternosorg/mclogs-java.git'
+                    url = 'https://github.com/aternosorg/mclogs-java'
+                }
+            }
         }
     }
 
     repositories {
-        mavenLocal()
+        maven {
+            def releaseRepo = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+            def snapshotRepo = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+            url = isReleaseVersion ? releaseRepo : snapshotRepo
+            credentials {
+                username = findProperty('ossrhUsername')
+                password = findProperty('ossrhPassword')
+            }
+        }
     }
+}
+
+signing {
+    def signingKey = findProperty("ATERNOS_GPG_SIGNING_KEY").toString()
+    def signingPassword = findProperty("ATERNOS_GPG_SIGNING_PASSPHRASE").toString()
+    useInMemoryPgpKeys(signingKey, signingPassword)
+    sign publishing.publications.mavenJava
+}
+
+tasks.withType(Sign).configureEach {
+    onlyIf { isReleaseVersion }
 }

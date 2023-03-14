@@ -1,0 +1,35 @@
+name: Release
+on:
+  push:
+    tags:
+      - '*.*.*'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 1.8
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 8
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Build with Gradle
+        run: ./gradlew build -Prelease=${{  github.ref_name }}
+      - name: Test with Gradle
+        run: ./gradlew test -Prelease=${{  github.ref_name }}
+      - name: Publish to Maven Central
+        env:
+          ATERNOS_GPG_SIGNING_KEY: ${{ secrets.ATERNOS_GPG_SIGNING_KEY }}
+          ATERNOS_GPG_SIGNING_PASSPHRASE: ${{ secrets.ATERNOS_GPG_SIGNING_PASSPHRASE }}
+          OSSRH_USERNAME: ${{ secrets.SONATYPE_OSSRH_USERNAME }}
+          OSSRH_PASSWORD: ${{ secrets.SONATYPE_OSSRH_PASSWORD }}
+        run: ./gradlew publish -Prelease=${{ github.ref_name }}
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            ./build/libs/mclogs-*.jar
+          body_path: ${{ github.workspace }}/CHANGELOG.md
+          name: v${{ github.ref_name }}
