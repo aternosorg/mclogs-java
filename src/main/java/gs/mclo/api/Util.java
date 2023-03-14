@@ -1,4 +1,4 @@
-package gs.mclo.java;
+package gs.mclo.api;
 
 import java.io.BufferedReader;
 import java.io.IOException;

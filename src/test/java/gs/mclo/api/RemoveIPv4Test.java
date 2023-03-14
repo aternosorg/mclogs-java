@@ -1,7 +1,8 @@
-import gs.mclo.java.Log;
+package gs.mclo.api;
+
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class RemoveIPv4Test {
     @Test
