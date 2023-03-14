@@ -84,8 +84,8 @@ publishing {
 }
 
 signing {
-    def signingKey = findProperty("ATERNOS_GPG_SIGNING_KEY").toString()
-    def signingPassword = findProperty("ATERNOS_GPG_SIGNING_PASSPHRASE").toString()
+    def signingKey = findProperty("SIGNING_KEY").toString()
+    def signingPassword = findProperty("SIGNING_PASSPHRASE").toString()
     useInMemoryPgpKeys(signingKey, signingPassword)
     sign publishing.publications.mavenJava
 }
