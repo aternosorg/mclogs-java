@@ -13,9 +13,10 @@ jobs:
         with:
           distribution: temurin
           java-version: ${{ matrix.java }}
+          cache: 'gradle'
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: init submodule
         run: git submodule init && git submodule update
       - name: Build with Gradle
-        run: ./gradlew test
+        run: ./gradlew build --no-daemon

@@ -13,19 +13,18 @@ jobs:
         with:
           distribution: temurin
           java-version: 8
+          cache: 'gradle'
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Build with Gradle
-        run: ./gradlew build -Prelease=${{  github.ref_name }}
-      - name: Test with Gradle
-        run: ./gradlew test -Prelease=${{  github.ref_name }}
+        run: ./gradlew build --no-daemon -Prelease=${{  github.ref_name }}
       - name: Publish to Maven Central
         env:
           ORG_GRADLE_PROJECT_SIGNING_KEY: ${{ secrets.ATERNOS_GPG_SIGNING_KEY }}
           ORG_GRADLE_PROJECT_SIGNING_PASSPHRASE: ${{ secrets.ATERNOS_GPG_SIGNING_PASSPHRASE }}
           ORG_GRADLE_PROJECT_OSSRH_USERNAME: ${{ secrets.SONATYPE_OSSRH_USERNAME }}
           ORG_GRADLE_PROJECT_OSSRH_PASSWORD: ${{ secrets.SONATYPE_OSSRH_PASSWORD }}
-        run: ./gradlew publish -Prelease=${{ github.ref_name }}
+        run: ./gradlew publish --no-daemon -Prelease=${{ github.ref_name }}
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
