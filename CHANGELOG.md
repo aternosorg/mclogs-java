@@ -1,1 +1,3 @@
 - Update dependencies
+- mark the client property of UploadLogResponse as transient
+  - This should fix an issue with deserialization on Java 17+

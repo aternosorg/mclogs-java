@@ -6,7 +6,7 @@ import java.io.IOException;
 
 public class UploadLogResponse extends JsonResponse {
     protected String id = null;
-    protected MclogsClient client;
+    protected transient MclogsClient client;
 
     /**
      * set the client used to upload this log
