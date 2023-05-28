@@ -1,15 +1,35 @@
 package gs.mclo.api;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import com.google.gson.Gson;
+
+import java.io.*;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
 public class Util {
+
+    public static String[] listFilesInDirectory(File file) {
+        if(!file.exists())
+            return new String[0];
+        String[] files = file.list();
+        if (files == null)
+            files = new String[0];
+
+        return Arrays.stream(files)
+                .filter(f -> f.matches(Log.ALLOWED_FILE_NAME_PATTERN.pattern()))
+                .sorted()
+                .toArray(String[]::new);
+    }
+
+    public static <T> HttpResponse.BodyHandler<T> parseResponse(Class<T> clazz, Gson gson) {
+        return responseInfo -> HttpResponse.BodySubscribers.mapping(HttpResponse.BodySubscribers.ofString(StandardCharsets.UTF_8),
+                body -> gson.fromJson(body, clazz));
+    }
 
     /**
      * parse an input stream to a string

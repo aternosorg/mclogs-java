@@ -6,25 +6,31 @@ import gs.mclo.api.response.UploadLogResponse;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.URI;
 import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.Arrays;
+import java.util.concurrent.CompletableFuture;
 
 public class MclogsClient {
-    protected String projectName = null;
-    protected String projectVersion = null;
 
-    protected String minecraftVersion = null;
+    private final Gson gson = new Gson();
+    private final HttpClient httpClient = HttpClient.newBuilder()
+            .version(HttpClient.Version.HTTP_2)
+            .followRedirects(HttpClient.Redirect.NORMAL)
+            .build();
 
-    protected String customUserAgent = null;
+    private String projectName = null;
+    private String projectVersion = null;
 
-    protected Instance instance = new Instance();
+    private String minecraftVersion = null;
 
-    protected Gson gson = new Gson();
+    private String customUserAgent = null;
+
+    private Instance instance = new Instance();
 
     /**
      * Create a new Mclogs instance with a custom user agent
@@ -154,40 +160,15 @@ public class MclogsClient {
      * @param log the log to upload
      * @return the response
      */
-    public UploadLogResponse uploadLog(Log log) throws IOException {
-        //connect to api
-        URL url = new URL(instance.getLogUploadUrl());
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        try {
-            connection.setRequestMethod("POST");
-            connection.setDoOutput(true);
-
-            //convert log to application/x-www-form-urlencoded
-            String content = "content=" + URLEncoder.encode(log.getContent(), StandardCharsets.UTF_8.toString());
-            byte[] out = content.getBytes(StandardCharsets.UTF_8);
-            int length = out.length;
-
-            //send log to api
-            connection.setFixedLengthStreamingMode(length);
-            connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-            connection.setRequestProperty("Accepts", "application/json");
-            connection.setRequestProperty("User-Agent", this.getUserAgent());
-            connection.connect();
-            try (OutputStream os = connection.getOutputStream()) {
-                os.write(out);
-            }
-
-            //handle response
-            UploadLogResponse response = gson.fromJson(
-                    Util.inputStreamToString(connection.getInputStream()),
-                    UploadLogResponse.class
-            );
-            response.setClient(this).throwIfError();
-            connection.disconnect();
-            return response;
-        } finally {
-            connection.disconnect();
-        }
+    public CompletableFuture<UploadLogResponse> uploadLog(Log log) {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(instance.getLogUploadUrl()))
+                .header("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+                .header("Accepts", "application/json")
+                .header("User-Agent", this.getUserAgent())
+                .POST(HttpRequest.BodyPublishers.ofString("content=" + URLEncoder.encode(log.getContent(), StandardCharsets.UTF_8)))
+                .build();
+        return httpClient.sendAsync(request, Util.parseResponse(UploadLogResponse.class, gson)).thenApply(HttpResponse::body);
     }
 
     /**
@@ -196,7 +177,7 @@ public class MclogsClient {
      * @param log the log to upload
      * @return the response
      */
-    public UploadLogResponse uploadLog(String log) throws IOException {
+    public CompletableFuture<UploadLogResponse> uploadLog(String log) {
         return this.uploadLog(new Log(log));
     }
 
@@ -206,55 +187,42 @@ public class MclogsClient {
      * @param log the log to upload
      * @return the response
      */
-    public UploadLogResponse uploadLog(Path log) throws IOException {
+    public CompletableFuture<UploadLogResponse> uploadLog(Path log) throws IOException {
         return this.uploadLog(new Log(log));
     }
 
     /**
      * Fetch the raw contents of a log from mclo.gs
+     *
      * @param logId the id of the log
      * @return the raw contents of the log
      * @throws IOException if an error occurs while fetching the log
      */
-    public String getRawLogContent(String logId) throws IOException {
-        HttpURLConnection connection = (HttpURLConnection) new URL(instance.getRawLogUrl(logId)).openConnection();
-        try {
-            connection.setRequestMethod("GET");
-            connection.setRequestProperty("User-Agent", this.getUserAgent());
-            connection.connect();
-            String response = Util.inputStreamToString(connection.getInputStream());
-            connection.disconnect();
-            return response;
-        }
-        finally {
-            connection.disconnect();
-        }
+    public CompletableFuture<String> getRawLogContent(String logId) throws IOException {
+        HttpRequest request = HttpRequest
+                .newBuilder()
+                .uri(URI.create(instance.getRawLogUrl(logId)))
+                .header("User-Agent", this.getUserAgent())
+                .GET()
+                .build();
+        return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString()).thenApply(HttpResponse::body);
     }
 
     /**
      * Fetch the insights for a log from mclo.gs
+     *
      * @param logId the id of the log
      * @return the insights for the log
-     * @throws IOException if an error occurs while fetching the insights
      */
-    public InsightsResponse getInsights(String logId) throws IOException {
-        HttpURLConnection connection = (HttpURLConnection) new URL(instance.getLogInsightsUrl(logId)).openConnection();
-        try {
-            connection.setRequestMethod("GET");
-            connection.setRequestProperty("User-Agent", this.getUserAgent());
-            connection.setRequestProperty("Accepts", "application/json");
-            connection.connect();
-            InsightsResponse response = gson.fromJson(
-                    Util.inputStreamToString(connection.getInputStream()),
-                    InsightsResponse.class
-            );
-            response.throwIfError();
-            connection.disconnect();
-            return response;
-        }
-        finally {
-            connection.disconnect();
-        }
+    public CompletableFuture<InsightsResponse> getInsights(String logId) {
+        HttpRequest request = HttpRequest
+                .newBuilder()
+                .uri(URI.create(instance.getLogInsightsUrl(logId)))
+                .header("User-Agent", this.getUserAgent())
+                .header("Accepts", "application/json")
+                .GET()
+                .build();
+        return httpClient.sendAsync(request, Util.parseResponse(InsightsResponse.class, gson)).thenApply(HttpResponse::body);
     }
 
     /**
@@ -263,20 +231,7 @@ public class MclogsClient {
      * @return log file names
      */
     public String[] listLogsInDirectory(String directory){
-        File logsDirectory = new File(directory, "logs");
-
-        if (!logsDirectory.exists()) {
-            return new String[0];
-        }
-
-        String[] files = logsDirectory.list();
-        if (files == null)
-            files = new String[0];
-
-        return Arrays.stream(files)
-                .filter(file -> file.matches(Log.ALLOWED_FILE_NAME_PATTERN.pattern()))
-                .sorted()
-                .toArray(String[]::new);
+        return Util.listFilesInDirectory(new File(directory, "logs"));
     }
 
     /**
@@ -285,19 +240,6 @@ public class MclogsClient {
      * @return log file names
      */
     public String[] listCrashReportsInDirectory(String directory){
-        File crashReportDirectory = new File(directory, "crash-reports");
-
-        if (!crashReportDirectory.exists()) {
-            return new String[0];
-        }
-
-        String[] files = crashReportDirectory.list();
-        if (files == null)
-            files = new String[0];
-
-        return Arrays.stream(files)
-                .filter(file -> file.matches(Log.ALLOWED_FILE_NAME_PATTERN.pattern()))
-                .sorted()
-                .toArray(String[]::new);
+        return Util.listFilesInDirectory(new File(directory, "crash-reports"));
     }
 }

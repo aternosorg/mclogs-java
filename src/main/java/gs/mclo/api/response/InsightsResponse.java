@@ -7,27 +7,27 @@ public class InsightsResponse extends JsonResponse {
     /**
      * ID of detected log (name/type) e.g. "vanilla/server"
      */
-    protected String id = null;
+    private String id = null;
 
     /**
      * Software name, e.g. "Vanilla"
      */
-    protected String name = null;
+    private String name = null;
 
     /**
      * Software type, e.g. "server"
      */
-    protected String type = null;
+    private String type = null;
 
     /**
      * Combined title, e.g. "Vanilla 1.12.2 Server Log"
      */
-    protected String title = null;
+    private String title = null;
 
     /**
      * Information obtained from the analysis of the log
      */
-    protected Analysis analysis = null;
+    private Analysis analysis = null;
 
     /**
      * Get the ID of detected log (name/type) e.g. "vanilla/server"

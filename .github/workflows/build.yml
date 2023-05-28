@@ -5,7 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java: [8, 11, 17, 19]
+        java: [11, 17, 19]
     steps:
       - uses: actions/checkout@v2
       - name: Set up Java
@@ -16,7 +16,5 @@ jobs:
           cache: 'gradle'
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
-      - name: init submodule
-        run: git submodule init && git submodule update
       - name: Build with Gradle
         run: ./gradlew build --no-daemon

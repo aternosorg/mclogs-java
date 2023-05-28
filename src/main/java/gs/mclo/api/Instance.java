@@ -1,8 +1,8 @@
 package gs.mclo.api;
 
 public class Instance {
-    protected String apiBaseUrl;
-    protected String viewLogUrl;
+    private String apiBaseUrl;
+    private String viewLogUrl;
 
     /**
      * Create a new Instance with the default API base URL and view log URL

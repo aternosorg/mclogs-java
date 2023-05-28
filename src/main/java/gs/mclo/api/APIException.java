@@ -5,7 +5,7 @@ import gs.mclo.api.response.JsonResponse;
 import java.io.IOException;
 
 public class APIException extends IOException {
-    protected JsonResponse response;
+    protected final JsonResponse response;
 
     public APIException(JsonResponse response) {
         super("The API returned an error");
