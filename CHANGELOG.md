@@ -1,3 +1,5 @@
 - Update dependencies
-- mark the client property of UploadLogResponse as transient
-  - This should fix an issue with deserialization on Java 17+
+- Utilize `CompletableFuture` to wrap around API calls
+- API calls are now async
+- Moved visibility of all fields to `private`, some are also `final`
+- Utilizes Java 11s `HttpClient`
