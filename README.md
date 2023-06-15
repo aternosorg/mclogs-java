@@ -11,7 +11,7 @@ This project is available from Maven Central, so you just need to add the depend
 #### Gradle
 ```gradle
 dependencies {
-    implementation 'gs.mclo:api:3.0.0'
+    implementation 'gs.mclo:api:4.0.0'
 }
 ```
 
@@ -20,7 +20,7 @@ dependencies {
 <dependency>
   <groupId>gs.mclo</groupId>
   <artifactId>api</artifactId>
-  <version>3.0.0</version>
+  <version>4.0.0</version>
 </dependency>
 ```
 
@@ -47,21 +47,22 @@ client = new MclogsClient("mclogs-java-example/1.0.0");
 Sharing the log file:
 ```java
 // share the log file
-var apiResponse = client.uploadLog(log);
-System.out.println(apiResponse.getUrl());
+CompletableFuture<UploadLogResponse> future = client.uploadLog(log);
+UploadLogResponse response = future.get();
+System.out.println(response.getUrl());
 ```
 
 There are also shortcuts for posting raw content or a path:
 ```java
 // share a log file by path
-var apiResponse = client.uploadLog(Paths.get("./logs/latest.log"));
+CompletableFuture<UploadLogResponse> future = client.uploadLog(Paths.get("./logs/latest.log"));
 // share a log file by raw content
-apiResponse = client.uploadLog("example content");
+future = client.uploadLog("example content");
 ```
 
 ### Fetch a log file's contents
 ```java
-String secondResponse = client.getRawLogContent("HpAwPry");
+String secondResponse = client.getRawLogContent("HpAwPry").get();
 ```
 
 ### Using a self-hosted instance of mclogs
