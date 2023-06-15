@@ -4,8 +4,8 @@ plugins {
     id 'signing'
 }
 
-sourceCompatibility = 8
-targetCompatibility = 8
+sourceCompatibility = 11
+targetCompatibility = 11
 
 group = 'gs.mclo'
 version = project.findProperty("release") ?: "dev"
