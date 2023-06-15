@@ -3,10 +3,11 @@ package gs.mclo.api.response;
 import gs.mclo.api.MclogsClient;
 
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
 public class UploadLogResponse extends JsonResponse {
-    protected String id = null;
-    protected transient MclogsClient client;
+    private String id = null;
+    private transient MclogsClient client;
 
     /**
      * set the client used to upload this log
@@ -46,16 +47,15 @@ public class UploadLogResponse extends JsonResponse {
      * @return the raw content of this log
      * @throws IOException if an error occurs while fetching the content
      */
-    public String getRawContent() throws IOException {
+    public CompletableFuture<String> getRawContent() throws IOException {
         return this.client.getRawLogContent(this.id);
     }
 
     /**
      * Fetch the insights for this log
      * @return the insights for this log
-     * @throws IOException if an error occurs while fetching the insights
      */
-    public InsightsResponse getInsights() throws IOException {
+    public CompletableFuture<InsightsResponse> getInsights() {
         return this.client.getInsights(this.id);
     }
 }

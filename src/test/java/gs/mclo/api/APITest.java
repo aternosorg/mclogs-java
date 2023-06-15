@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -82,15 +83,17 @@ public class APITest {
     void shareLog() {
         assertDoesNotThrow(() -> {
             MclogsClient client = new MclogsClient("aternos/mclogs-java-tests");
-            UploadLogResponse response = client.uploadLog(Paths.get("src/test/resources/logs/one.log"));
-            assertTrue(response.isSuccess());
-            assertNotNull(response.getId());
-            assertNotNull(response.getUrl());
-            assertNull(response.getError());
-            String rawLog = response.getRawContent();
-            assertEquals(Util.getFileContents("src/test/resources/logs/one.log"), rawLog);
+            CompletableFuture<UploadLogResponse> response = client.uploadLog(Paths.get("src/test/resources/logs/one.log"));
+            UploadLogResponse res = response.get();
+            res.setClient(client);
+            assertTrue(res.isSuccess());
+            assertNotNull(res.getId());
+            assertNotNull(res.getUrl());
+            assertNull(res.getError());
+            CompletableFuture<String> rawLog = res.getRawContent();
+            assertEquals(Util.getFileContents("src/test/resources/logs/one.log"), rawLog.get());
 
-            System.out.println("Test log has been shared at " + response.getUrl());
+            System.out.println("Test log has been shared at " + res.getUrl());
         });
     }
 
@@ -98,15 +101,17 @@ public class APITest {
     void shareGzipLog() {
         assertDoesNotThrow(() -> {
             MclogsClient client = new MclogsClient("aternos/mclogs-java-tests");
-            UploadLogResponse response = client.uploadLog(Paths.get("src/test/resources/logs/three.log.gz"));
-            assertTrue(response.isSuccess());
-            assertNotNull(response.getId());
-            assertNotNull(response.getUrl());
-            assertNull(response.getError());
-            String rawLog = response.getRawContent();
-            assertEquals(Util.getGZIPFileContents("src/test/resources/logs/three.log.gz"), rawLog);
+            CompletableFuture<UploadLogResponse> response = client.uploadLog(Paths.get("src/test/resources/logs/three.log.gz"));
+            UploadLogResponse res = response.get();
+            res.setClient(client);
+            assertTrue(res.isSuccess());
+            assertNotNull(res.getId());
+            assertNotNull(res.getUrl());
+            assertNull(res.getError());
+            CompletableFuture<String> rawLog = res.getRawContent();
+            assertEquals(Util.getGZIPFileContents("src/test/resources/logs/three.log.gz"), rawLog.get());
 
-            System.out.println("Gzip test log has been shared at " + response.getUrl());
+            System.out.println("Gzip test log has been shared at " + res.getUrl());
         });
     }
 
@@ -144,15 +149,17 @@ public class APITest {
 
             MclogsClient client = new MclogsClient("aternos/mclogs-java-tests")
                     .setInstance(instance);
-            UploadLogResponse response = client.uploadLog(Util.getFileContents("src/test/resources/logs/one.log"));
-            assertTrue(response.isSuccess());
-            assertNotNull(response.getId());
-            assertNotNull(response.getUrl());
-            assertNull(response.getError());
-            String rawLog = response.getRawContent();
-            assertEquals(Util.getFileContents("src/test/resources/logs/one.log"), rawLog);
+            CompletableFuture<UploadLogResponse> response = client.uploadLog(Util.getFileContents("src/test/resources/logs/one.log"));
+            UploadLogResponse res = response.get();
+            res.setClient(client);
+            assertTrue(res.isSuccess());
+            assertNotNull(res.getId());
+            assertNotNull(res.getUrl());
+            assertNull(res.getError());
+            CompletableFuture<String> rawLog = res.getRawContent();
+            assertEquals(Util.getFileContents("src/test/resources/logs/one.log"), rawLog.get());
 
-            System.out.println("Test log has been shared at " + response.getUrl());
+            System.out.println("Test log has been shared at " + res.getUrl());
         });
     }
 
@@ -160,19 +167,22 @@ public class APITest {
     void getLogInsights() {
         assertDoesNotThrow(() -> {
             MclogsClient client = new MclogsClient("aternos/mclogs-java-tests");
-            UploadLogResponse response = client.uploadLog(Paths.get("src/test/resources/logs/three.log.gz"));
-            assertTrue(response.isSuccess());
-            assertNotNull(response.getId());
-            assertNotNull(response.getUrl());
-            assertNull(response.getError());
-            InsightsResponse insights = response.getInsights();
+            CompletableFuture<UploadLogResponse> response = client.uploadLog(Paths.get("src/test/resources/logs/three.log.gz"));
+            UploadLogResponse res = response.get();
+            res.setClient(client);
+            assertTrue(res.isSuccess());
+            assertNotNull(res.getId());
+            assertNotNull(res.getUrl());
+            assertNull(res.getError());
+            CompletableFuture<InsightsResponse> insightsResponse = res.getInsights();
+            InsightsResponse insights = insightsResponse.get();
             assertNotNull(insights);
             assertTrue(insights.isSuccess());
             assertNotNull(insights.getAnalysis());
             assertNotNull(insights.getAnalysis().getInformation());
             assertNotNull(insights.getAnalysis().getProblems());
 
-            System.out.println("Gzip test log has been shared at " + response.getUrl());
+            System.out.println("Gzip test log has been shared at " + res.getUrl());
         });
     }
 }

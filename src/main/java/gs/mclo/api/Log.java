@@ -15,7 +15,7 @@ public class Log {
     /**
      * log content
      */
-    protected String content;
+    private String content;
 
     /**
      * pattern for IPv4 addresses
@@ -117,7 +117,7 @@ public class Log {
      */
     private void filterIPv4() {
         Matcher matcher = IPV4_PATTERN.matcher(this.content);
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         while (matcher.find()) {
             if (isWhitelistedIPv4(matcher.group())) {
                 continue;
@@ -147,7 +147,7 @@ public class Log {
      */
     private void filterIPv6() {
         Matcher matcher = IPV6_PATTERN.matcher(this.content);
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         while (matcher.find()) {
             if (isWhitelistedIPv6(matcher.group())) {
                 continue;

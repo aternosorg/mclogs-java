@@ -3,8 +3,8 @@ package gs.mclo.api.response;
 import gs.mclo.api.APIException;
 
 public class JsonResponse {
-    protected boolean success = true;
-    protected String error = null;
+    private boolean success = true;
+    private String error = null;
 
     /**
      * was the upload successful?
