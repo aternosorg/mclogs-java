@@ -1,5 +1,1 @@
-- Update dependencies
-- Utilize `CompletableFuture` to wrap around API calls
-- API calls are now async
-- Moved visibility of all fields to `private`, some are also `final`
-- Utilizes Java 11s `HttpClient`
+- fix accept header name
