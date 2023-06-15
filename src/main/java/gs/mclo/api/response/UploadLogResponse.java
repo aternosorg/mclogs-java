@@ -45,9 +45,8 @@ public class UploadLogResponse extends JsonResponse {
     /**
      * Fetch the raw content of this log
      * @return the raw content of this log
-     * @throws IOException if an error occurs while fetching the content
      */
-    public CompletableFuture<String> getRawContent() throws IOException {
+    public CompletableFuture<String> getRawContent() {
         return this.client.getRawLogContent(this.id);
     }
 

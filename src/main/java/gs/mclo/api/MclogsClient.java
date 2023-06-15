@@ -164,7 +164,7 @@ public class MclogsClient {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(instance.getLogUploadUrl()))
                 .header("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
-                .header("Accepts", "application/json")
+                .header("Accept", "application/json")
                 .header("User-Agent", this.getUserAgent())
                 .POST(HttpRequest.BodyPublishers.ofString("content=" + URLEncoder.encode(log.getContent(), StandardCharsets.UTF_8)))
                 .build();
@@ -196,9 +196,8 @@ public class MclogsClient {
      *
      * @param logId the id of the log
      * @return the raw contents of the log
-     * @throws IOException if an error occurs while fetching the log
      */
-    public CompletableFuture<String> getRawLogContent(String logId) throws IOException {
+    public CompletableFuture<String> getRawLogContent(String logId) {
         HttpRequest request = HttpRequest
                 .newBuilder()
                 .uri(URI.create(instance.getRawLogUrl(logId)))
@@ -219,7 +218,7 @@ public class MclogsClient {
                 .newBuilder()
                 .uri(URI.create(instance.getLogInsightsUrl(logId)))
                 .header("User-Agent", this.getUserAgent())
-                .header("Accepts", "application/json")
+                .header("Accept", "application/json")
                 .GET()
                 .build();
         return httpClient.sendAsync(request, Util.parseResponse(InsightsResponse.class, gson)).thenApply(HttpResponse::body);
