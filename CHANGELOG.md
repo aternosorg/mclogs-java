@@ -1,1 +1,1 @@
-- fix accept header name
+- Fix setting client in UploadLogResponse (Fix [#9](https://github.com/aternosorg/mclogs-java/issues/9))
