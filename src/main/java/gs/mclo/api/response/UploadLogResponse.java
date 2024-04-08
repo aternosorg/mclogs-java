@@ -2,7 +2,6 @@ package gs.mclo.api.response;
 
 import gs.mclo.api.MclogsClient;
 
-import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
 public class UploadLogResponse extends JsonResponse {

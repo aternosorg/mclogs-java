@@ -168,7 +168,9 @@ public class MclogsClient {
                 .header("User-Agent", this.getUserAgent())
                 .POST(HttpRequest.BodyPublishers.ofString("content=" + URLEncoder.encode(log.getContent(), StandardCharsets.UTF_8)))
                 .build();
-        return httpClient.sendAsync(request, Util.parseResponse(UploadLogResponse.class, gson)).thenApply(HttpResponse::body);
+        return httpClient.sendAsync(request, Util.parseResponse(UploadLogResponse.class, gson))
+                .thenApply(HttpResponse::body)
+                .thenApply(r -> r.setClient(this));
     }
 
     /**
