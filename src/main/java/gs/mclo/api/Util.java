@@ -6,6 +6,7 @@ import java.io.*;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -13,10 +14,10 @@ import java.util.zip.GZIPInputStream;
 
 public class Util {
 
-    public static String[] listFilesInDirectory(File file) {
-        if(!file.exists())
+    public static String[] listFilesInDirectory(File directory) {
+        if(!directory.exists())
             return new String[0];
-        String[] files = file.list();
+        String[] files = directory.list();
         if (files == null)
             files = new String[0];
 
@@ -24,6 +25,10 @@ public class Util {
                 .filter(f -> f.matches(Log.ALLOWED_FILE_NAME_PATTERN.pattern()))
                 .sorted()
                 .toArray(String[]::new);
+    }
+
+    public static String[] listFilesInDirectory(Path directory) {
+        return listFilesInDirectory(directory.toFile());
     }
 
     public static <T> HttpResponse.BodyHandler<T> parseResponse(Class<T> clazz, Gson gson) {

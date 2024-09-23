@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import gs.mclo.api.response.InsightsResponse;
 import gs.mclo.api.response.UploadLogResponse;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
@@ -176,7 +175,7 @@ public class MclogsClient {
     /**
      * Upload a log to mclo.gs
      *
-     * @param log the log to upload
+     * @param log content of the log to upload
      * @return the response
      */
     public CompletableFuture<UploadLogResponse> uploadLog(String log) {
@@ -186,7 +185,7 @@ public class MclogsClient {
     /**
      * Upload a log to mclo.gs
      *
-     * @param log the log to upload
+     * @param log path to the log to upload
      * @return the response
      */
     public CompletableFuture<UploadLogResponse> uploadLog(Path log) throws IOException {
@@ -231,8 +230,26 @@ public class MclogsClient {
      * @param directory server/client directory
      * @return log file names
      */
+    public String[] listLogsInDirectory(Path directory){
+        return Util.listFilesInDirectory(directory.resolve("logs"));
+    }
+
+    /**
+     * list logs in a directory
+     * @param directory server/client directory
+     * @return log file names
+     */
     public String[] listLogsInDirectory(String directory){
-        return Util.listFilesInDirectory(new File(directory, "logs"));
+        return listLogsInDirectory(Path.of(directory));
+    }
+
+    /**
+     * list crash reports in a directory
+     * @param directory server/client directory
+     * @return log file names
+     */
+    public String[] listCrashReportsInDirectory(Path directory){
+        return Util.listFilesInDirectory(directory.resolve("crash-reports"));
     }
 
     /**
@@ -241,6 +258,6 @@ public class MclogsClient {
      * @return log file names
      */
     public String[] listCrashReportsInDirectory(String directory){
-        return Util.listFilesInDirectory(new File(directory, "crash-reports"));
+        return listCrashReportsInDirectory(Path.of(directory));
     }
 }
