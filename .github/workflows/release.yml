@@ -7,15 +7,15 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Set up JDK 1.8
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 11
           cache: 'gradle'
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
       - name: Build with Gradle
         run: ./gradlew build --no-daemon -Prelease=${{  github.ref_name }}
       - name: Publish to Maven Central
@@ -26,7 +26,7 @@ jobs:
           ORG_GRADLE_PROJECT_OSSRH_PASSWORD: ${{ secrets.SONATYPE_OSSRH_PASSWORD }}
         run: ./gradlew publish --no-daemon -Prelease=${{ github.ref_name }}
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: |
             ./build/libs/mclogs-*.jar
