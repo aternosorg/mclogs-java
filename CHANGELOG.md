@@ -1,1 +1,1 @@
-- Add Path based variants to listCrashReportsInDirectory and listLogsInDirectory
+- Allow more BungeeCord log file names
