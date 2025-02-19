@@ -2,6 +2,7 @@ package gs.mclo.api;
 
 import com.google.gson.Gson;
 import gs.mclo.api.response.InsightsResponse;
+import gs.mclo.api.response.LimitsResponse;
 import gs.mclo.api.response.UploadLogResponse;
 
 import java.io.IOException;
@@ -154,26 +155,20 @@ public class MclogsClient {
     }
 
     /**
-     * Upload a log to mclo.gs
+     * Upload a log to mclogs
      *
      * @param log the log to upload
      * @return the response
      */
     public CompletableFuture<UploadLogResponse> uploadLog(Log log) {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(instance.getLogUploadUrl()))
-                .header("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
-                .header("Accept", "application/json")
-                .header("User-Agent", this.getUserAgent())
-                .POST(HttpRequest.BodyPublishers.ofString("content=" + URLEncoder.encode(log.getContent(), StandardCharsets.UTF_8)))
-                .build();
+        HttpRequest request = this.uploadRequest(instance.getLogUploadUrl(), log);
         return httpClient.sendAsync(request, Util.parseResponse(UploadLogResponse.class, gson))
                 .thenApply(HttpResponse::body)
                 .thenApply(r -> r.setClient(this));
     }
 
     /**
-     * Upload a log to mclo.gs
+     * Upload a log to mclogs
      *
      * @param log content of the log to upload
      * @return the response
@@ -183,7 +178,7 @@ public class MclogsClient {
     }
 
     /**
-     * Upload a log to mclo.gs
+     * Upload a log to mclogs
      *
      * @param log path to the log to upload
      * @return the response
@@ -193,7 +188,7 @@ public class MclogsClient {
     }
 
     /**
-     * Fetch the raw contents of a log from mclo.gs
+     * Fetch the raw contents of a log from mclogs
      *
      * @param logId the id of the log
      * @return the raw contents of the log
@@ -209,7 +204,7 @@ public class MclogsClient {
     }
 
     /**
-     * Fetch the insights for a log from mclo.gs
+     * Fetch the insights for a log from mclogs
      *
      * @param logId the id of the log
      * @return the insights for the log
@@ -226,7 +221,54 @@ public class MclogsClient {
     }
 
     /**
-     * list logs in a directory
+     * Analyse a log with mclogs without saving it
+     * @param log the log to analyse
+     * @return the insights of the log
+     */
+    public CompletableFuture<InsightsResponse> analyseLog(Log log) {
+        HttpRequest request = uploadRequest(instance.getLogAnalysisUrl(), log);
+        return httpClient.sendAsync(request, Util.parseResponse(InsightsResponse.class, gson))
+                .thenApply(HttpResponse::body);
+    }
+
+    /**
+     * Analyse a log with mclogs without saving it
+     *
+     * @param log content of the log to analyse
+     * @return the insights of the log
+     */
+    public CompletableFuture<InsightsResponse> analyseLog(String log) {
+        return this.analyseLog(new Log(log));
+    }
+
+    /**
+     * Analyse a log with mclogs without saving it
+     *
+     * @param log path to the log to analyse
+     * @return the insights of the log
+     */
+    public CompletableFuture<InsightsResponse> analyseLog(Path log) throws IOException {
+        return this.analyseLog(new Log(log));
+    }
+
+
+    /**
+     * Get the storage limits of this mclogs instance
+     * @return the storage limits
+     */
+    public CompletableFuture<LimitsResponse> getLimits() {
+        HttpRequest request = HttpRequest
+                .newBuilder()
+                .uri(URI.create(instance.getStorageLimitUrl()))
+                .header("User-Agent", this.getUserAgent())
+                .header("Accept", "application/json")
+                .GET()
+                .build();
+        return httpClient.sendAsync(request, Util.parseResponse(LimitsResponse.class, gson)).thenApply(HttpResponse::body);
+    }
+
+    /**
+     * List logs in the {@code logs} subdirectory of a path
      * @param directory server/client directory
      * @return log file names
      */
@@ -235,7 +277,7 @@ public class MclogsClient {
     }
 
     /**
-     * list logs in a directory
+     * List logs in the {@code logs} subdirectory of a path
      * @param directory server/client directory
      * @return log file names
      */
@@ -244,7 +286,7 @@ public class MclogsClient {
     }
 
     /**
-     * list crash reports in a directory
+     * List logs in the {@code crash-reports} subdirectory of a path
      * @param directory server/client directory
      * @return log file names
      */
@@ -253,11 +295,22 @@ public class MclogsClient {
     }
 
     /**
-     * list crash reports in a directory
+     * List logs in the {@code crash-reports} subdirectory of a path
      * @param directory server/client directory
      * @return log file names
      */
     public String[] listCrashReportsInDirectory(String directory){
         return listCrashReportsInDirectory(Path.of(directory));
+    }
+
+
+    private HttpRequest uploadRequest(String url, Log log) {
+        return HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+                .header("Accept", "application/json")
+                .header("User-Agent", this.getUserAgent())
+                .POST(HttpRequest.BodyPublishers.ofString("content=" + URLEncoder.encode(log.getContent(), StandardCharsets.UTF_8)))
+                .build();
     }
 }

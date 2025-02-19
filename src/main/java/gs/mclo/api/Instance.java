@@ -102,4 +102,20 @@ public class Instance {
     public String getLogInsightsUrl(String id) {
         return apiBaseUrl + "1/insights/" + id;
     }
+
+    /**
+     * Get the URL for analysing a log without saving it
+     * @return the URL for analysing a log without saving it (e.g. <a href="https://api.mclo.gs/1/analyse">https://api.mclo.gs/1/analyse</a>)
+     */
+    public String getLogAnalysisUrl() {
+        return apiBaseUrl + "1/analyse";
+    }
+
+    /**
+     * Get the URL for fetching storage limits
+     * @return the URL for fetching storage limits (e.g. <a href="https://api.mclo.gs/1/limit">https://api.mclo.gs/1/limit</a>)
+     */
+    public String getStorageLimitUrl() {
+        return apiBaseUrl + "1/limits";
+    }
 }

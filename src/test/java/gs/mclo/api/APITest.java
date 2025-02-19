@@ -1,6 +1,7 @@
 package gs.mclo.api;
 
 import gs.mclo.api.response.InsightsResponse;
+import gs.mclo.api.response.LimitsResponse;
 import gs.mclo.api.response.UploadLogResponse;
 import org.junit.jupiter.api.Test;
 
@@ -12,11 +13,11 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class APITest {
+    MclogsClient client = new MclogsClient("aternos/mclogs-java-tests");
 
     @Test
     void listLogs() {
         assertDoesNotThrow(() -> {
-            MclogsClient client = new MclogsClient("aternos/mclogs-java-tests");
             assertArrayEquals(
                     Stream.of("one.log", "three.log.gz", "two.log").sorted().toArray(String[]::new),
                     Arrays.stream(client.listLogsInDirectory("src/test/resources")).sorted().toArray(String[]::new)
@@ -27,7 +28,6 @@ public class APITest {
     @Test
     void listLogsNoDir() {
         assertDoesNotThrow(() -> {
-            MclogsClient client = new MclogsClient("aternos/mclogs-java-tests");
             assertArrayEquals(
                     new String[0],
                     Arrays.stream(client.listLogsInDirectory("src/test/resources/directory")).sorted().toArray(String[]::new)
@@ -38,7 +38,6 @@ public class APITest {
     @Test
     void listLogsEmptyDir() {
         assertDoesNotThrow(() -> {
-            MclogsClient client = new MclogsClient("aternos/mclogs-java-tests");
             assertArrayEquals(
                     new String[0],
                     Arrays.stream(client.listLogsInDirectory("src/test/resources/empty")).sorted().toArray(String[]::new)
@@ -49,7 +48,6 @@ public class APITest {
     @Test
     void listCrashReports() {
         assertDoesNotThrow(() -> {
-            MclogsClient client = new MclogsClient("aternos/mclogs-java-tests");
             assertArrayEquals(
                     Stream.of("eight.txt", "seven.log.gz", "five.log").sorted().toArray(String[]::new),
                     Arrays.stream(client.listCrashReportsInDirectory("src/test/resources")).sorted().toArray(String[]::new)
@@ -60,7 +58,6 @@ public class APITest {
     @Test
     void listCrashReportsNoDir() {
         assertDoesNotThrow(() -> {
-            MclogsClient client = new MclogsClient("aternos/mclogs-java-tests");
             assertArrayEquals(
                     new String[0],
                     Arrays.stream(client.listCrashReportsInDirectory("src/test/resources/dir")).sorted().toArray(String[]::new)
@@ -71,7 +68,6 @@ public class APITest {
     @Test
     void listCrashReportsEmptyDir() {
         assertDoesNotThrow(() -> {
-            MclogsClient client = new MclogsClient("aternos/mclogs-java-tests");
             assertArrayEquals(
                     new String[0],
                     Arrays.stream(client.listCrashReportsInDirectory("src/test/resources/empty")).sorted().toArray(String[]::new)
@@ -82,7 +78,6 @@ public class APITest {
     @Test
     void shareLog() {
         assertDoesNotThrow(() -> {
-            MclogsClient client = new MclogsClient("aternos/mclogs-java-tests");
             CompletableFuture<UploadLogResponse> response = client.uploadLog(Paths.get("src/test/resources/logs/one.log"));
             UploadLogResponse res = response.get();
             res.setClient(client);
@@ -100,7 +95,6 @@ public class APITest {
     @Test
     void shareGzipLog() {
         assertDoesNotThrow(() -> {
-            MclogsClient client = new MclogsClient("aternos/mclogs-java-tests");
             CompletableFuture<UploadLogResponse> response = client.uploadLog(Paths.get("src/test/resources/logs/three.log.gz"));
             UploadLogResponse res = response.get();
             res.setClient(client);
@@ -117,7 +111,6 @@ public class APITest {
 
     @Test
     void shareSecretFile() {
-        MclogsClient client = new MclogsClient("aternos/mclogs-java-tests");
         assertThrows(IllegalArgumentException.class, () -> client.uploadLog(Paths.get("src/test/resources/logs/secret.secret")));
     }
 
@@ -166,7 +159,6 @@ public class APITest {
     @Test
     void getLogInsights() {
         assertDoesNotThrow(() -> {
-            MclogsClient client = new MclogsClient("aternos/mclogs-java-tests");
             CompletableFuture<UploadLogResponse> response = client.uploadLog(Paths.get("src/test/resources/logs/three.log.gz"));
             UploadLogResponse res = response.get();
             res.setClient(client);
@@ -181,8 +173,31 @@ public class APITest {
             assertNotNull(insights.getAnalysis());
             assertNotNull(insights.getAnalysis().getInformation());
             assertNotNull(insights.getAnalysis().getProblems());
+        });
+    }
 
-            System.out.println("Gzip test log has been shared at " + res.getUrl());
+    @Test
+    void analyseLog() {
+        assertDoesNotThrow(() -> {
+            CompletableFuture<InsightsResponse> insightsResponse = client.analyseLog(Paths.get("src/test/resources/logs/three.log.gz"));
+            InsightsResponse insights = insightsResponse.get();
+            assertNotNull(insights);
+            assertTrue(insights.isSuccess());
+            assertNotNull(insights.getAnalysis());
+            assertNotNull(insights.getAnalysis().getInformation());
+            assertNotNull(insights.getAnalysis().getProblems());
+        });
+    }
+
+    @Test
+    void getStorageLimits() {
+        assertDoesNotThrow(() -> {
+            CompletableFuture<LimitsResponse> limitsResponse = client.getLimits();
+            LimitsResponse limits = limitsResponse.get();
+            assertNotNull(limits);
+            assertTrue(limits.getStorageTime() > 0);
+            assertTrue(limits.getMaxLength() > 0);
+            assertTrue(limits.getMaxLines() > 0);
         });
     }
 }

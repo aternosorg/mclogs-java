@@ -1,1 +1,2 @@
-- Allow more BungeeCord log file names
+- Add endpoint for analysing a log without storing it
+- Add endpoint for fetching storage limits
