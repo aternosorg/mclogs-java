@@ -45,9 +45,13 @@ public class Log {
     };
 
     /**
-     * Only allow logs with the file extension `.log` or `.txt` (can be suffixed by both `.0` and `.gz` in that order)
+     * Only allow logs with the file extension `.log` or `.txt` which may be suffixed by:
+     * <ul>
+     *     <li> up to two dots with numbers as used by BungeeCord
+     *     <li> `.gz` for gzip compressed files
+     * </ul>
      */
-    public static final Pattern ALLOWED_FILE_NAME_PATTERN = Pattern.compile(".*\\.(log|txt)(\\.0)?(\\.gz)?");
+    public static final Pattern ALLOWED_FILE_NAME_PATTERN = Pattern.compile(".*\\.(log|txt)(\\.\\d+){0,2}(\\.gz)?");
 
     /**
      * Maximum length of log files that can be uploaded in bytes
