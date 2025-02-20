@@ -2,7 +2,7 @@ package gs.mclo.api;
 
 import com.google.gson.Gson;
 import gs.mclo.api.response.InsightsResponse;
-import gs.mclo.api.response.LimitsResponse;
+import gs.mclo.api.response.Limits;
 import gs.mclo.api.response.UploadLogResponse;
 
 import java.io.IOException;
@@ -14,6 +14,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 public class MclogsClient {
 
@@ -183,8 +184,21 @@ public class MclogsClient {
      * @param log path to the log to upload
      * @return the response
      */
-    public CompletableFuture<UploadLogResponse> uploadLog(Path log) throws IOException {
-        return this.uploadLog(new Log(log));
+    public CompletableFuture<UploadLogResponse> uploadLog(Path log) {
+        return this.getLimits()
+                .handleAsync((limits, e) -> {
+                    if (e != null) {
+                        return new LogReader(log);
+                    }
+                    return new LogReader(log, limits);
+                })
+                .thenCompose(reader -> {
+                    try {
+                        return this.uploadLog(reader.readLog());
+                    } catch (IOException e) {
+                        throw new CompletionException(e);
+                    }
+                });
     }
 
     /**
@@ -248,7 +262,20 @@ public class MclogsClient {
      * @return the insights of the log
      */
     public CompletableFuture<InsightsResponse> analyseLog(Path log) throws IOException {
-        return this.analyseLog(new Log(log));
+        return this.getLimits()
+                .handleAsync((limits, e) -> {
+                    if (e != null) {
+                        return new LogReader(log);
+                    }
+                    return new LogReader(log, limits);
+                })
+                .thenCompose(reader -> {
+                    try {
+                        return this.analyseLog(reader.readLog());
+                    } catch (IOException e) {
+                        throw new CompletionException(e);
+                    }
+                });
     }
 
 
@@ -256,7 +283,7 @@ public class MclogsClient {
      * Get the storage limits of this mclogs instance
      * @return the storage limits
      */
-    public CompletableFuture<LimitsResponse> getLimits() {
+    public CompletableFuture<Limits> getLimits() {
         HttpRequest request = HttpRequest
                 .newBuilder()
                 .uri(URI.create(instance.getStorageLimitUrl()))
@@ -264,7 +291,7 @@ public class MclogsClient {
                 .header("Accept", "application/json")
                 .GET()
                 .build();
-        return httpClient.sendAsync(request, Util.parseResponse(LimitsResponse.class, gson)).thenApply(HttpResponse::body);
+        return httpClient.sendAsync(request, Util.parseResponse(Limits.class, gson)).thenApply(HttpResponse::body);
     }
 
     /**

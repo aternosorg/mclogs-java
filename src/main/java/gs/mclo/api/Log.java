@@ -1,5 +1,7 @@
 package gs.mclo.api;
 
+import gs.mclo.api.response.Limits;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,12 +13,6 @@ import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
 public class Log {
-
-    /**
-     * log content
-     */
-    private String content;
-
     /**
      * pattern for IPv4 addresses
      */
@@ -50,45 +46,45 @@ public class Log {
      *     <li> up to two dots with numbers as used by BungeeCord
      *     <li> `.gz` for gzip compressed files
      * </ul>
+     * @deprecated Use {@link LogReader#ALLOWED_FILE_NAME_PATTERN} instead
      */
-    public static final Pattern ALLOWED_FILE_NAME_PATTERN = Pattern.compile(".*\\.(log|txt)(\\.\\d+){0,2}(\\.gz)?");
+    @Deprecated(since = "4.2", forRemoval = true)
+    public static final Pattern ALLOWED_FILE_NAME_PATTERN = LogReader.ALLOWED_FILE_NAME_PATTERN;
 
     /**
      * Maximum length of log files that can be uploaded in bytes
+     * @deprecated Since these limits configurable use {@link MclogsClient#getLimits()} to fetch them
      */
+    @Deprecated(since = "4.2", forRemoval = true)
     public static final int MAX_LOG_LENGTH = 10 * 1024 * 1024;
 
     /**
-     * Create a new Log
-     * @param logFile The log file, which must have a file extension of '.log' or '.txt'. The file extension may be suffixed by both `.0` and `.gz`
+     * Log content
+     */
+    private String content;
+
+    /**
+     * Create a new Log from a Path
+     * @param logFile Path to the log file, which must have a file extension of '.log' or '.txt'. The file extension may be suffixed by both `.0` and `.gz`
      * @throws IOException If an exception occurs while reading the logFile
      */
     public Log(Path logFile) throws IOException {
-        if (!Files.exists(logFile)) {
-            throw new FileNotFoundException("Log file does not exist!");
-        }
-        if (Files.isDirectory(logFile)) {
-            throw new IllegalArgumentException("Path '" + logFile + "' is a directory, not a file!");
-        }
-        if (!logFile.getFileName().toString().matches(ALLOWED_FILE_NAME_PATTERN.pattern())) {
-            throw new IllegalArgumentException("Log file must have a `.log` or `.txt` file extension. It may be suffixed by both `.0` and `.gz`");
-        }
+        this(new LogReader(logFile));
+    }
 
-        InputStream in = Files.newInputStream(logFile);
-        if (logFile.getFileName().toString().endsWith(".gz")) {
-            in = new GZIPInputStream(in);
-        }
-
-        this.content = Util.inputStreamToString(in);
-        in.close();
-        this.filter();
+    /**
+     * Create a new Log from a log reader
+     * @param reader The log reader to read the log from
+     * @throws IOException If an exception occurs while reading the logFile
+     */
+    public Log(LogReader reader) throws IOException {
+        this(reader.readContents());
     }
 
     /**
      * Create a new Log
      * @param content The whole content of the log to share.
      */
-    @SuppressWarnings("unused") // API usage
     public Log(String content) {
         this.content = content;
         this.filter();
@@ -103,17 +99,15 @@ public class Log {
      */
     @Deprecated
     public Log(String dir, String file) throws IOException {
-        Log log = new Log(Paths.get(dir).resolve(file));
-        this.content = log.content;
+        this(Paths.get(dir).resolve(file));
     }
 
     /**
      * remove IP addresses
      */
     private void filter() {
-        filterIPv4();
-        filterIPv6();
-        filterLength();
+        this.filterIPv4();
+        this.filterIPv6();
     }
 
     /**
@@ -174,14 +168,6 @@ public class Log {
             }
         }
         return false;
-    }
-
-    /**
-     * limit the log length to 10 MB
-     */
-    private void filterLength() {
-        this.content = this.content.trim();
-        this.content = this.content.substring(0, Math.min(this.content.length(), MAX_LOG_LENGTH));
     }
 
     /**

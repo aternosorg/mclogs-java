@@ -2,6 +2,7 @@ plugins {
     id 'java-library'
     id 'maven-publish'
     id 'signing'
+    alias(libs.plugins.jmh)
 }
 
 sourceCompatibility = 11
@@ -16,6 +17,7 @@ repositories {
 }
 
 dependencies {
+    compileOnly(libs.jetbrains.annotations)
     testImplementation(libs.junit.api)
     testRuntimeOnly(libs.junit.engine)
 
@@ -27,6 +29,12 @@ test {
     testLogging {
         events "passed", "skipped", "failed"
     }
+}
+
+jmh {
+    fork = 3
+    iterations = 3
+    warmupIterations = 0
 }
 
 java {

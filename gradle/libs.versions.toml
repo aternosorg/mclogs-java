@@ -1,8 +1,13 @@
 [versions]
 gson = "2.12.1"
+jetbrains-annotations = "26.0.2"
 junit = "5.11.4"
 
 [libraries]
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref = "jetbrains-annotations" }
 junit-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
 junit-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
+
+[plugins]
+jmh = { id = "me.champeau.jmh", version = "0.7.2" }

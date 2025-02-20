@@ -1,13 +1,14 @@
 package gs.mclo.api;
 
 import gs.mclo.api.response.InsightsResponse;
-import gs.mclo.api.response.LimitsResponse;
+import gs.mclo.api.response.Limits;
 import gs.mclo.api.response.UploadLogResponse;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -80,7 +81,6 @@ public class APITest {
         assertDoesNotThrow(() -> {
             CompletableFuture<UploadLogResponse> response = client.uploadLog(Paths.get("src/test/resources/logs/one.log"));
             UploadLogResponse res = response.get();
-            res.setClient(client);
             assertTrue(res.isSuccess());
             assertNotNull(res.getId());
             assertNotNull(res.getUrl());
@@ -97,7 +97,6 @@ public class APITest {
         assertDoesNotThrow(() -> {
             CompletableFuture<UploadLogResponse> response = client.uploadLog(Paths.get("src/test/resources/logs/three.log.gz"));
             UploadLogResponse res = response.get();
-            res.setClient(client);
             assertTrue(res.isSuccess());
             assertNotNull(res.getId());
             assertNotNull(res.getUrl());
@@ -111,7 +110,8 @@ public class APITest {
 
     @Test
     void shareSecretFile() {
-        assertThrows(IllegalArgumentException.class, () -> client.uploadLog(Paths.get("src/test/resources/logs/secret.secret")));
+        CompletableFuture<?> future = client.uploadLog(Paths.get("src/test/resources/logs/secret.secret"));
+        assertThrows(ExecutionException.class, future::get);
     }
 
     @Test
@@ -144,7 +144,6 @@ public class APITest {
                     .setInstance(instance);
             CompletableFuture<UploadLogResponse> response = client.uploadLog(Util.getFileContents("src/test/resources/logs/one.log"));
             UploadLogResponse res = response.get();
-            res.setClient(client);
             assertTrue(res.isSuccess());
             assertNotNull(res.getId());
             assertNotNull(res.getUrl());
@@ -161,7 +160,6 @@ public class APITest {
         assertDoesNotThrow(() -> {
             CompletableFuture<UploadLogResponse> response = client.uploadLog(Paths.get("src/test/resources/logs/three.log.gz"));
             UploadLogResponse res = response.get();
-            res.setClient(client);
             assertTrue(res.isSuccess());
             assertNotNull(res.getId());
             assertNotNull(res.getUrl());
@@ -192,8 +190,8 @@ public class APITest {
     @Test
     void getStorageLimits() {
         assertDoesNotThrow(() -> {
-            CompletableFuture<LimitsResponse> limitsResponse = client.getLimits();
-            LimitsResponse limits = limitsResponse.get();
+            CompletableFuture<Limits> limitsResponse = client.getLimits();
+            Limits limits = limitsResponse.get();
             assertNotNull(limits);
             assertTrue(limits.getStorageTime() > 0);
             assertTrue(limits.getMaxLength() > 0);

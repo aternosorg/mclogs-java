@@ -2,21 +2,36 @@ package gs.mclo.api.response;
 
 import java.time.Duration;
 
-public class LimitsResponse {
+/**
+ * Storage limits of a mclogs instance. This represents the response of the `/1/limits` endpoint.
+ */
+public class Limits {
     /**
      * The duration in seconds that a log is stored for after the last view.
      */
-    private int storageTime;
+    private final int storageTime;
 
     /**
      * Maximum file length in bytes. Logs over this limit will be truncated to this length.
      */
-    private int maxLength;
+    private final int maxLength;
 
     /**
      * Maximum number of lines. Additional lines will be removed.
      */
-    private int maxLines;
+    private final int maxLines;
+
+    /**
+     * Create a new instance of the
+     * @param storageTime the duration in seconds that a log is stored for after the last view
+     * @param maxLength the maximum file length in bytes
+     * @param maxLines the maximum number of lines
+     */
+    public Limits(int storageTime, int maxLength, int maxLines) {
+        this.storageTime = storageTime;
+        this.maxLength = maxLength;
+        this.maxLines = maxLines;
+    }
 
     /**
      * Get the duration in seconds that a log is stored for after the last view.
