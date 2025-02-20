@@ -11,7 +11,7 @@ This project is available from Maven Central, so you just need to add the depend
 #### Gradle
 ```gradle
 dependencies {
-    implementation 'gs.mclo:api:4.0.4'
+    implementation 'gs.mclo:api:5.0.0'
 }
 ```
 
@@ -20,7 +20,7 @@ dependencies {
 <dependency>
   <groupId>gs.mclo</groupId>
   <artifactId>api</artifactId>
-  <version>4.0.4</version>
+  <version>5.0.4</version>
 </dependency>
 ```
 
