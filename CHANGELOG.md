@@ -1,2 +1,2 @@
 ## Build System
-- Migrate to Portal OSSRH Staging API
+- Migrate to new Maven Central publishing system.
