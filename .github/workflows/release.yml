@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up JDK 1.8
+      - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -17,15 +17,15 @@ jobs:
           cache: 'gradle'
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
-      - name: Build with Gradle
-        run: ./gradlew build --no-daemon -Prelease=${{  github.ref_name }}
       - name: Publish to Maven Central
         env:
-          ORG_GRADLE_PROJECT_SIGNING_KEY: ${{ secrets.ATERNOS_GPG_SIGNING_KEY }}
-          ORG_GRADLE_PROJECT_SIGNING_PASSPHRASE: ${{ secrets.ATERNOS_GPG_SIGNING_PASSPHRASE }}
+          JRELEASER_GPG_SECRET_KEY: ${{ secrets.ATERNOS_GPG_SIGNING_KEY }}
+          JRELEASER_GPG_PUBLIC_KEY: ${{ secrets.ATERNOS_GPG_SIGNING_PUBLIC_KEY }}
+          JRELEASER_GPG_PASSPHRASE: ${{ secrets.ATERNOS_GPG_SIGNING_PASSPHRASE }}
+          JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ORG_GRADLE_PROJECT_OSSRH_USERNAME: ${{ secrets.SONATYPE_OSSRH_USERNAME }}
           ORG_GRADLE_PROJECT_OSSRH_PASSWORD: ${{ secrets.SONATYPE_OSSRH_PASSWORD }}
-        run: ./gradlew publish --no-daemon -Prelease=${{ github.ref_name }}
+        run: ./gradlew clean publish jreleaserDeploy --no-daemon -Prelease=${{ github.ref_name }}
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:

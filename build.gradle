@@ -1,8 +1,8 @@
 plugins {
     id 'java-library'
     id 'maven-publish'
-    id 'signing'
     alias(libs.plugins.jmh)
+    alias(libs.plugins.jreleaser)
 }
 
 sourceCompatibility = 11
@@ -80,25 +80,43 @@ publishing {
 
     repositories {
         maven {
-            // https://central.sonatype.org/publish/publish-portal-ossrh-staging-api/
-            def releaseRepo = "https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/"
-            def snapshotRepo = "https://central.sonatype.com/repository/maven-snapshots/"
-            url = isReleaseVersion ? releaseRepo : snapshotRepo
-            credentials {
-                username = findProperty('OSSRH_USERNAME')
-                password = findProperty('OSSRH_PASSWORD')
-            }
+            url = layout.buildDirectory.dir('staging-deploy')
         }
     }
 }
 
-signing {
-    def signingKey = findProperty("SIGNING_KEY").toString()
-    def signingPassword = findProperty("SIGNING_PASSPHRASE").toString()
-    useInMemoryPgpKeys(signingKey, signingPassword)
-    sign publishing.publications.mavenJava
-}
+jreleaser {
+    signing {
+        active = 'RELEASE'
+        armored = true
+    }
 
-tasks.withType(Sign).configureEach {
-    onlyIf { isReleaseVersion }
+    deploy {
+        maven {
+            mavenCentral {
+                'release-deploy' {
+                    active = 'RELEASE'
+                    url = 'https://central.sonatype.com/api/v1/publisher'
+                    stagingRepository('build/staging-deploy')
+                }
+            }
+            nexus2 {
+                'snapshot-deploy' {
+                    active = 'SNAPSHOT'
+                    url = 'https://central.sonatype.com/api/v1/publisher'
+                    snapshotUrl = 'https://central.sonatype.com/repository/maven-snapshots'
+                    snapshotSupported = true
+                    closeRepository = true
+                    releaseRepository = true
+                    stagingRepository('build/staging-deploy')
+                }
+            }
+        }
+    }
+
+    release {
+        github {
+            skipRelease = true
+        }
+    }
 }

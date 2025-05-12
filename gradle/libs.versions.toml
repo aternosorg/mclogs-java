@@ -1,7 +1,9 @@
 [versions]
 gson = "2.12.1"
 jetbrains-annotations = "26.0.2"
+jmh = "0.7.2"
 junit = "5.11.4"
+jreleaser = "1.18.0"
 
 [libraries]
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
@@ -10,4 +12,5 @@ junit-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "jun
 junit-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
 
 [plugins]
-jmh = { id = "me.champeau.jmh", version = "0.7.2" }
+jmh = { id = "me.champeau.jmh", version.ref = "jmh" }
+jreleaser = { id = "org.jreleaser", version.ref = "jreleaser" }
