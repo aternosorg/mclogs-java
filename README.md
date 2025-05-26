@@ -1,5 +1,10 @@
 # mclogs-java
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/aternosorg/mclogs-java/build.yml)
+![Maven Central Version](https://img.shields.io/maven-central/v/gs.mclo/api)
+![Requires Java 11](https://img.shields.io/badge/Requires-Java_11-orange)
+
 A java library used to list and share log files to the [mclo.gs](https://mclo.gs) API.
+This library is used in the [mclogs plugin and mods](https://github.com/aternosorg/mclogs-integration).
 
 ### Features
 - Remove IPv4 and IPv6 addresses before uploading the log
@@ -11,7 +16,7 @@ This project is available from Maven Central, so you just need to add the depend
 #### Gradle
 ```gradle
 dependencies {
-    implementation 'gs.mclo:api:5.0.0'
+    implementation 'gs.mclo:api:5.0.2'
 }
 ```
 
@@ -20,7 +25,7 @@ dependencies {
 <dependency>
   <groupId>gs.mclo</groupId>
   <artifactId>api</artifactId>
-  <version>5.0.4</version>
+  <version>5.0.2</version>
 </dependency>
 ```
 
@@ -72,8 +77,3 @@ instance.setApiBaseUrl("https://api.logs.example.com");
 instance.setViewLogUrl("https://api.logs.example.com");
 client.setInstance(instance);
 ```
-
-This library is used in the mclogs plugin and mods:
-[Bukkit](https://github.com/aternosorg/mclogs-bukkit) |
-[Forge](https://github.com/aternosorg/mclogs-forge) |
-[Fabric](https://github.com/aternosorg/mclogs-fabric)
