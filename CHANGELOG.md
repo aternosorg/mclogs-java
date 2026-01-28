@@ -1,3 +1,11 @@
+# v5.1.0
+
+## Improvements
+
+- Remove exception that is never thrown from signature of `MclogsClient#analyseLog(Path)`
+
+---
+
 # v5.0.0
 
 ## Breaking Changes

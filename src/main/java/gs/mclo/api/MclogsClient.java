@@ -261,7 +261,7 @@ public class MclogsClient {
      * @param log path to the log to analyse
      * @return the insights of the log
      */
-    public CompletableFuture<InsightsResponse> analyseLog(Path log) throws IOException {
+    public CompletableFuture<InsightsResponse> analyseLog(Path log) {
         return this.getLimits()
                 .handleAsync((limits, e) -> {
                     if (e != null) {
