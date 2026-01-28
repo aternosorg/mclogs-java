@@ -1,10 +1,8 @@
 package gs.mclo.api;
 
-import com.google.gson.Gson;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.io.*;
-import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -12,6 +10,7 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
+@ApiStatus.Internal
 public class Util {
 
     /**
@@ -41,18 +40,6 @@ public class Util {
      */
     public static String[] listFilesInDirectory(Path directory) {
         return listFilesInDirectory(directory.toFile());
-    }
-
-    /**
-     * Parse the response body as JSON
-     * @param clazz class to parse the JSON into
-     * @param gson gson instance
-     * @return body handler
-     * @param <T> class type
-     */
-    public static <T> HttpResponse.BodyHandler<T> parseResponse(Class<T> clazz, Gson gson) {
-        return responseInfo -> HttpResponse.BodySubscribers.mapping(HttpResponse.BodySubscribers.ofString(StandardCharsets.UTF_8),
-                body -> gson.fromJson(body, clazz));
     }
 
     /**

@@ -13,67 +13,53 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class APITest {
-    MclogsClient client = new MclogsClient("aternos/mclogs-java-tests");
-
+public class APITest extends BaseApiTest {
     @Test
     void listLogs() {
-        assertDoesNotThrow(() -> {
-            assertArrayEquals(
-                    Stream.of("one.log", "three.log.gz", "two.log").sorted().toArray(String[]::new),
-                    Arrays.stream(client.listLogsInDirectory("src/test/resources")).sorted().toArray(String[]::new)
-            );
-        });
+        assertDoesNotThrow(() -> assertArrayEquals(
+                Stream.of("one.log", "three.log.gz", "two.log").sorted().toArray(String[]::new),
+                Arrays.stream(client.listLogsInDirectory("src/test/resources")).sorted().toArray(String[]::new)
+        ));
     }
 
     @Test
     void listLogsNoDir() {
-        assertDoesNotThrow(() -> {
-            assertArrayEquals(
-                    new String[0],
-                    Arrays.stream(client.listLogsInDirectory("src/test/resources/directory")).sorted().toArray(String[]::new)
-            );
-        });
+        assertDoesNotThrow(() -> assertArrayEquals(
+                new String[0],
+                Arrays.stream(client.listLogsInDirectory("src/test/resources/directory")).sorted().toArray(String[]::new)
+        ));
     }
 
     @Test
     void listLogsEmptyDir() {
-        assertDoesNotThrow(() -> {
-            assertArrayEquals(
-                    new String[0],
-                    Arrays.stream(client.listLogsInDirectory("src/test/resources/empty")).sorted().toArray(String[]::new)
-            );
-        });
+        assertDoesNotThrow(() -> assertArrayEquals(
+                new String[0],
+                Arrays.stream(client.listLogsInDirectory("src/test/resources/empty")).sorted().toArray(String[]::new)
+        ));
     }
 
     @Test
     void listCrashReports() {
-        assertDoesNotThrow(() -> {
-            assertArrayEquals(
-                    Stream.of("eight.txt", "seven.log.gz", "five.log").sorted().toArray(String[]::new),
-                    Arrays.stream(client.listCrashReportsInDirectory("src/test/resources")).sorted().toArray(String[]::new)
-            );
-        });
+        assertDoesNotThrow(() -> assertArrayEquals(
+                Stream.of("eight.txt", "seven.log.gz", "five.log").sorted().toArray(String[]::new),
+                Arrays.stream(client.listCrashReportsInDirectory("src/test/resources")).sorted().toArray(String[]::new)
+        ));
     }
 
     @Test
     void listCrashReportsNoDir() {
-        assertDoesNotThrow(() -> {
-            assertArrayEquals(
-                    new String[0],
-                    Arrays.stream(client.listCrashReportsInDirectory("src/test/resources/dir")).sorted().toArray(String[]::new)
-            );
-        });
+        assertDoesNotThrow(() -> assertArrayEquals(
+                new String[0],
+                Arrays.stream(client.listCrashReportsInDirectory("src/test/resources/dir")).sorted().toArray(String[]::new)
+        ));
     }
 
     @Test
     void listCrashReportsEmptyDir() {
-        assertDoesNotThrow(() -> {
-            assertArrayEquals(
-                    new String[0],
-                    Arrays.stream(client.listCrashReportsInDirectory("src/test/resources/empty")).sorted().toArray(String[]::new)
-            );
-        });
+        assertDoesNotThrow(() -> assertArrayEquals(
+                new String[0],
+                Arrays.stream(client.listCrashReportsInDirectory("src/test/resources/empty")).sorted().toArray(String[]::new)
+        ));
     }
 
     @Test
@@ -81,10 +67,8 @@ public class APITest {
         assertDoesNotThrow(() -> {
             CompletableFuture<UploadLogResponse> response = client.uploadLog(Paths.get("src/test/resources/logs/one.log"));
             UploadLogResponse res = response.get();
-            assertTrue(res.isSuccess());
             assertNotNull(res.getId());
             assertNotNull(res.getUrl());
-            assertNull(res.getError());
             CompletableFuture<String> rawLog = res.getRawContent();
             assertEquals(Util.getFileContents("src/test/resources/logs/one.log"), rawLog.get());
 
@@ -97,10 +81,8 @@ public class APITest {
         assertDoesNotThrow(() -> {
             CompletableFuture<UploadLogResponse> response = client.uploadLog(Paths.get("src/test/resources/logs/three.log.gz"));
             UploadLogResponse res = response.get();
-            assertTrue(res.isSuccess());
             assertNotNull(res.getId());
             assertNotNull(res.getUrl());
-            assertNull(res.getError());
             CompletableFuture<String> rawLog = res.getRawContent();
             assertEquals(Util.getGZIPFileContents("src/test/resources/logs/three.log.gz"), rawLog.get());
 
@@ -116,9 +98,12 @@ public class APITest {
 
     @Test
     void userAgents() {
+        //noinspection DataFlowIssue
         assertThrows(IllegalArgumentException.class, () -> new MclogsClient(null));
         assertThrows(IllegalArgumentException.class, () -> new MclogsClient(""));
+        //noinspection DataFlowIssue
         assertThrows(IllegalArgumentException.class, () -> new MclogsClient("aternos/mclogs-java-tests", null));
+        //noinspection DataFlowIssue
         assertThrows(IllegalArgumentException.class, () -> new MclogsClient(null, "1.0.0"));
         assertThrows(IllegalArgumentException.class, () -> new MclogsClient("", "1.0.0"));
         assertThrows(IllegalArgumentException.class, () -> new MclogsClient("a", ""));
@@ -144,10 +129,8 @@ public class APITest {
                     .setInstance(instance);
             CompletableFuture<UploadLogResponse> response = client.uploadLog(Util.getFileContents("src/test/resources/logs/one.log"));
             UploadLogResponse res = response.get();
-            assertTrue(res.isSuccess());
             assertNotNull(res.getId());
             assertNotNull(res.getUrl());
-            assertNull(res.getError());
             CompletableFuture<String> rawLog = res.getRawContent();
             assertEquals(Util.getFileContents("src/test/resources/logs/one.log"), rawLog.get());
 
@@ -160,14 +143,11 @@ public class APITest {
         assertDoesNotThrow(() -> {
             CompletableFuture<UploadLogResponse> response = client.uploadLog(Paths.get("src/test/resources/logs/three.log.gz"));
             UploadLogResponse res = response.get();
-            assertTrue(res.isSuccess());
             assertNotNull(res.getId());
             assertNotNull(res.getUrl());
-            assertNull(res.getError());
             CompletableFuture<InsightsResponse> insightsResponse = res.getInsights();
             InsightsResponse insights = insightsResponse.get();
             assertNotNull(insights);
-            assertTrue(insights.isSuccess());
             assertNotNull(insights.getAnalysis());
             assertNotNull(insights.getAnalysis().getInformation());
             assertNotNull(insights.getAnalysis().getProblems());
@@ -180,7 +160,6 @@ public class APITest {
             CompletableFuture<InsightsResponse> insightsResponse = client.analyseLog(Paths.get("src/test/resources/logs/three.log.gz"));
             InsightsResponse insights = insightsResponse.get();
             assertNotNull(insights);
-            assertTrue(insights.isSuccess());
             assertNotNull(insights.getAnalysis());
             assertNotNull(insights.getAnalysis().getInformation());
             assertNotNull(insights.getAnalysis().getProblems());

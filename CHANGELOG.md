@@ -1,4 +1,12 @@
-# v5.1.0
+# v6.0.0
+
+## Breaking Changes
+
+- Api methods now complete exceptionally if the server returns an error response
+  instead of returning a response object with error details.
+  - Removed `ApiException#getResponse` and `JsonResponse#throwIfError` methods.
+  - Remove `JsonResponse`
+  - Remove the `success` and `error` fields from response objects.
 
 ## Improvements
 

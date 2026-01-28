@@ -1,9 +1,9 @@
 package gs.mclo.api;
 
 import com.google.gson.Gson;
-import gs.mclo.api.response.InsightsResponse;
-import gs.mclo.api.response.Limits;
-import gs.mclo.api.response.UploadLogResponse;
+import gs.mclo.api.response.*;
+import gs.mclo.api.util.JsonBodyHandler;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -167,9 +167,7 @@ public class MclogsClient {
      */
     public CompletableFuture<UploadLogResponse> uploadLog(Log log) {
         HttpRequest request = this.uploadRequest(instance.getLogUploadUrl(), log);
-        return httpClient.sendAsync(request, Util.parseResponse(UploadLogResponse.class, gson))
-                .thenApply(HttpResponse::body)
-                .thenApply(r -> r.setClient(this));
+        return asyncRequest(request, UploadLogResponse.class);
     }
 
     /**
@@ -235,7 +233,7 @@ public class MclogsClient {
                 .header("Accept", "application/json")
                 .GET()
                 .build();
-        return httpClient.sendAsync(request, Util.parseResponse(InsightsResponse.class, gson)).thenApply(HttpResponse::body);
+        return asyncRequest(request, InsightsResponse.class);
     }
 
     /**
@@ -246,8 +244,7 @@ public class MclogsClient {
      */
     public CompletableFuture<InsightsResponse> analyseLog(Log log) {
         HttpRequest request = uploadRequest(instance.getLogAnalysisUrl(), log);
-        return httpClient.sendAsync(request, Util.parseResponse(InsightsResponse.class, gson))
-                .thenApply(HttpResponse::body);
+        return asyncRequest(request, InsightsResponse.class);
     }
 
     /**
@@ -297,7 +294,7 @@ public class MclogsClient {
                 .header("Accept", "application/json")
                 .GET()
                 .build();
-        return httpClient.sendAsync(request, Util.parseResponse(Limits.class, gson)).thenApply(HttpResponse::body);
+        return asyncRequest(request, Limits.class);
     }
 
     /**
@@ -340,6 +337,10 @@ public class MclogsClient {
         return listCrashReportsInDirectory(Path.of(directory));
     }
 
+    private <T> CompletableFuture<T> asyncRequest(HttpRequest request, Class<T> responseClass) {
+        return httpClient.sendAsync(request, new JsonBodyHandler<>(this, responseClass))
+                .thenApply(HttpResponse::body);
+    }
 
     private HttpRequest uploadRequest(String url, Log log) {
         return HttpRequest.newBuilder()
@@ -349,5 +350,10 @@ public class MclogsClient {
                 .header("User-Agent", this.getUserAgent())
                 .POST(HttpRequest.BodyPublishers.ofString("content=" + URLEncoder.encode(log.getContent(), StandardCharsets.UTF_8)))
                 .build();
+    }
+
+    @ApiStatus.Internal
+    public Gson gson() {
+        return this.gson;
     }
 }

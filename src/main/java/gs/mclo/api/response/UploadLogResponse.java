@@ -1,23 +1,21 @@
 package gs.mclo.api.response;
 
 import gs.mclo.api.MclogsClient;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
-@SuppressWarnings("FieldMayBeFinal")
-public class UploadLogResponse extends JsonResponse {
-    private @Nullable String id = null;
+@SuppressWarnings({"FieldMayBeFinal", "NotNullFieldNotInitialized", "unused"})
+public class UploadLogResponse implements Initializable {
+    private String id;
     private transient @Nullable MclogsClient client;
 
-    /**
-     * set the client used to upload this log
-     * @param client the client used to upload this log
-     */
-    public UploadLogResponse setClient(MclogsClient client) {
+    @ApiStatus.Internal
+    @Override
+    public void setClient(MclogsClient client) {
         this.client = client;
-        return this;
     }
 
     /**
@@ -33,10 +31,7 @@ public class UploadLogResponse extends JsonResponse {
      * @return the url to view this log (e.g. <a href="https://mclo.gs/HpAwPry">https://mclo.gs/HpAwPry</a>)
      */
     public String getUrl() {
-        if (!isSuccess()) {
-            throw new IllegalStateException("Cannot get view url of log upload that failed");
-        }
-        return client().getInstance().getViewLogUrl(Objects.requireNonNull(id));
+        return client().getInstance().getViewLogUrl(id);
     }
 
     /**
@@ -44,10 +39,7 @@ public class UploadLogResponse extends JsonResponse {
      * @return the url to view this log raw (e.g. <a href="https://mclo.gs/raw/HpAwPry">https://mclo.gs/raw/HpAwPry</a>)
      */
     public String getRawUrl() {
-        if (!isSuccess()) {
-            throw new IllegalStateException("Cannot get view url of log upload that failed");
-        }
-        return client().getInstance().getRawLogUrl(Objects.requireNonNull(id));
+        return client().getInstance().getRawLogUrl(id);
     }
 
     /**
@@ -55,10 +47,7 @@ public class UploadLogResponse extends JsonResponse {
      * @return the raw content of this log
      */
     public CompletableFuture<String> getRawContent() {
-        if (!isSuccess()) {
-            throw new IllegalStateException("Cannot get view url of log upload that failed");
-        }
-        return client().getRawLogContent(Objects.requireNonNull(id));
+        return client().getRawLogContent(id);
     }
 
     /**
@@ -66,10 +55,7 @@ public class UploadLogResponse extends JsonResponse {
      * @return the insights for this log
      */
     public CompletableFuture<InsightsResponse> getInsights() {
-        if (!isSuccess()) {
-            throw new IllegalStateException("Cannot get view url of log upload that failed");
-        }
-        return client().getInsights(Objects.requireNonNull(id));
+        return client().getInsights(id);
     }
 
     private MclogsClient client() {

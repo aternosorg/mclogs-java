@@ -10,6 +10,7 @@ gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref = "jetbrains-annotations" }
 junit-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
 junit-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
+junit-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit" }
 
 [plugins]
 jmh = { id = "me.champeau.jmh", version.ref = "jmh" }
