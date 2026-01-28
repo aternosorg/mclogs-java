@@ -47,6 +47,29 @@ jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
+String getChangeLog() {
+    def input = file('CHANGELOG.md').text.readLines()
+    def output = []
+    def foundHeader = false
+    for (line in input) {
+        if (!foundHeader && line.startsWith('# ')) {
+            foundHeader = true
+            continue
+        }
+        if (foundHeader) {
+            if (line.startsWith('---')) break
+            output << line
+        }
+    }
+    return output.join('\n').trim()
+}
+
+tasks.register('generateReleaseBody') {
+    doLast {
+        file('release-body.md').text = getChangeLog()
+    }
+}
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
