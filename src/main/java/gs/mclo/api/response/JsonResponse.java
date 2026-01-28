@@ -1,10 +1,12 @@
 package gs.mclo.api.response;
 
 import gs.mclo.api.APIException;
+import org.jetbrains.annotations.Nullable;
 
+@SuppressWarnings({"FieldMayBeFinal", "FieldCanBeLocal"})
 public class JsonResponse {
     private boolean success = true;
-    private String error = null;
+    private @Nullable String error = null;
 
     /**
      * was the upload successful?
@@ -18,7 +20,7 @@ public class JsonResponse {
      * Get the error message
      * @return the error message
      */
-    public String getError() {
+    public @Nullable String getError() {
         return error;
     }
 

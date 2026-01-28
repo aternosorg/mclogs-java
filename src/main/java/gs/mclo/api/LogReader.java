@@ -33,15 +33,17 @@ public class LogReader {
 
     /**
      * Creates a new log reader with default limits
+     *
      * @param path the path to the log file
      */
     public LogReader(Path path) {
-        this(path, new Limits(0, Log.MAX_LOG_LENGTH, 25_000));
+        this(path, Limits.DEFAULT);
     }
 
     /**
      * Creates a new log reader with custom limits
-     * @param path the path to the log file
+     *
+     * @param path   the path to the log file
      * @param limits the limits to use
      */
     public LogReader(Path path, @Nullable Limits limits) {
@@ -56,6 +58,7 @@ public class LogReader {
 
     /**
      * Sets the limits for this log
+     *
      * @param limits the limits to use
      * @return this log reader
      */
@@ -66,9 +69,10 @@ public class LogReader {
 
     /**
      * Reads the contents of the log file
+     *
      * @return the log
      * @throws FileNotFoundException if the log file does not exist
-     * @throws IOException if an I/O error occurs
+     * @throws IOException           if an I/O error occurs
      */
     public String readContents() throws IOException {
         File file = path.toFile();
@@ -90,6 +94,7 @@ public class LogReader {
 
     /**
      * Reads the log file and returns a log object
+     *
      * @return a new log object
      * @throws IOException if an I/O error occurs
      */
@@ -99,6 +104,7 @@ public class LogReader {
 
     /**
      * Read the outputs of an entire reader into a string
+     *
      * @param reader the reader to read from
      * @return the string
      * @throws IOException if an I/O error occurs

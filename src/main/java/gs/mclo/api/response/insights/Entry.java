@@ -1,5 +1,8 @@
 package gs.mclo.api.response.insights;
 
+import org.jetbrains.annotations.Nullable;
+
+@SuppressWarnings("NotNullFieldNotInitialized")
 public class Entry {
     /**
      * The level of the entry.
@@ -11,12 +14,12 @@ public class Entry {
      * UNIX timestamp of the entry.
      * This is null for most logs as most software doesn't log dates.
      */
-    protected Integer time;
+    protected @Nullable Integer time;
 
     /**
      * The prefix of the entry.
      */
-    protected String prefix;
+    protected @Nullable String prefix;
 
     /**
      * The lines that make up the entry.
@@ -24,9 +27,10 @@ public class Entry {
     protected Line[] lines;
 
     /**
-     * The problems that make up the entry.
+     * The level of this entry.
+     * @return The level of this entry or null if unknown
      */
-    public Level getLevel() {
+    public @Nullable Level getLevel() {
         return Level.fromValue(level);
     }
 
@@ -35,7 +39,7 @@ public class Entry {
      * This is null for most logs as most software doesn't log dates.
      * @return UNIX timestamp of the entry
      */
-    public Integer getTime() {
+    public @Nullable Integer getTime() {
         return time;
     }
 
@@ -43,7 +47,7 @@ public class Entry {
      * Get the prefix of the entry.
      * @return the prefix of the entry
      */
-    public String getPrefix() {
+    public @Nullable String getPrefix() {
         return prefix;
     }
 

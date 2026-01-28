@@ -1,5 +1,6 @@
 package gs.mclo.api.response.insights;
 
+@SuppressWarnings("NotNullFieldNotInitialized")
 public class Analysis {
     /**
      * A list of detected problems

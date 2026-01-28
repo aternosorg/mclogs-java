@@ -3,6 +3,7 @@
 ## Improvements
 
 - Remove exception that is never thrown from signature of `MclogsClient#analyseLog(Path)`
+- Add annotations for nullability where missing
 
 ---
 

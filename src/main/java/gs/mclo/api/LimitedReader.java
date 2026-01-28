@@ -1,6 +1,5 @@
 package gs.mclo.api;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -14,6 +13,7 @@ public class LimitedReader extends Reader {
     /**
      * The underlying reader
      */
+    @Nullable
     private Reader in;
     /**
      * The remaining byte limit. If null, no limit is enforced.
@@ -39,7 +39,7 @@ public class LimitedReader extends Reader {
     }
 
     @Override
-    public int read(char @NotNull [] chars, int offset, int length) throws IOException {
+    public int read(char[] chars, int offset, int length) throws IOException {
         synchronized(this.lock) {
             if (this.in == null) {
                 throw new IOException("Stream closed");
@@ -58,9 +58,10 @@ public class LimitedReader extends Reader {
                 }
 
                 char c = readChars[i];
-                if (this.remainingByteLimit != null) {
+                var remainingByteLimit = this.remainingByteLimit;
+                if (remainingByteLimit != null) {
                     int byteCount = getPartialUTF8Size(c);
-                    if (this.getRemainingUTF8Size(c) > this.remainingByteLimit) {
+                    if (this.getRemainingUTF8Size(c) > remainingByteLimit) {
                         return i == 0 ? -1 : i;
                     }
                     this.remainingByteLimit -= byteCount;

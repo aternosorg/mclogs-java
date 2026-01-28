@@ -1,11 +1,19 @@
 package gs.mclo.api.response;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.time.Duration;
 
 /**
  * Storage limits of a mclogs instance. This represents the response of the `/1/limits` endpoint.
  */
 public class Limits {
+    public static final @Nullable Limits DEFAULT = new Limits(
+            30 * 24 * 60 * 60,
+            10 * 1024 * 1024,
+            10000
+    );
+
     /**
      * The duration in seconds that a log is stored for after the last view.
      */
@@ -23,9 +31,10 @@ public class Limits {
 
     /**
      * Create a new instance of the
+     *
      * @param storageTime the duration in seconds that a log is stored for after the last view
-     * @param maxLength the maximum file length in bytes
-     * @param maxLines the maximum number of lines
+     * @param maxLength   the maximum file length in bytes
+     * @param maxLines    the maximum number of lines
      */
     public Limits(int storageTime, int maxLength, int maxLines) {
         this.storageTime = storageTime;
@@ -35,6 +44,7 @@ public class Limits {
 
     /**
      * Get the duration in seconds that a log is stored for after the last view.
+     *
      * @return the duration in seconds that a log is stored for after the last view
      */
     public int getStorageTime() {
@@ -43,6 +53,7 @@ public class Limits {
 
     /**
      * Get the duration that a log is stored for after the last view.
+     *
      * @return the duration that a log is stored for after the last view
      */
     public Duration getStorageDuration() {
@@ -51,6 +62,7 @@ public class Limits {
 
     /**
      * Get the maximum file length in bytes. Logs over this limit will be truncated to this length.
+     *
      * @return the maximum file length in bytes
      */
     public int getMaxLength() {
@@ -59,6 +71,7 @@ public class Limits {
 
     /**
      * Get the maximum number of lines. Additional lines will be removed.
+     *
      * @return the maximum number of lines
      */
     public int getMaxLines() {

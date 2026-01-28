@@ -1,5 +1,7 @@
 package gs.mclo.api.response.insights;
 
+import org.jetbrains.annotations.Nullable;
+
 public enum Level {
     Emergency(0, "Emergency"),
     Alert(1, "Alert"),
@@ -18,7 +20,12 @@ public enum Level {
         this.name = name;
     }
 
-    public static Level fromValue(int value) {
+    /**
+     * Get level from a numeric value
+     * @param value numeric value of the level
+     * @return level or null if not found
+     */
+    public static @Nullable Level fromValue(int value) {
         for (Level level : Level.values()) {
             if (level.getValue() == value) {
                 return level;

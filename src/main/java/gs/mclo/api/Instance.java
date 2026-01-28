@@ -1,7 +1,11 @@
 package gs.mclo.api;
 
+import org.jetbrains.annotations.Nullable;
+
 public class Instance {
+    @SuppressWarnings("NotNullFieldNotInitialized")
     private String apiBaseUrl;
+    @SuppressWarnings("NotNullFieldNotInitialized")
     private String viewLogUrl;
 
     /**
@@ -16,7 +20,7 @@ public class Instance {
      * @param apiBaseUrl the base URL for the API (e.g. <a href="https://api.mclo.gs/">https://api.mclo.gs/</a>)
      * @param viewLogUrl the base URL for viewing logs (e.g. <a href="https://mclo.gs/">https://mclo.gs/</a>)
      */
-    public Instance(String apiBaseUrl, String viewLogUrl) {
+    public Instance(@Nullable String apiBaseUrl, @Nullable String viewLogUrl) {
         this.setApiBaseUrl(apiBaseUrl)
                 .setViewLogUrl(viewLogUrl);
     }
@@ -31,7 +35,7 @@ public class Instance {
      * Get the base URL for the API
      * @return the base URL for the API
      */
-    public String getApiBaseUrl() {
+    public @Nullable String getApiBaseUrl() {
         return apiBaseUrl;
     }
 
@@ -40,7 +44,7 @@ public class Instance {
      * @param apiBaseUrl the base URL for the API (e.g. <a href="https://api.mclo.gs/">https://api.mclo.gs/</a>)
      * @return this
      */
-    public Instance setApiBaseUrl(String apiBaseUrl) {
+    public Instance setApiBaseUrl(@Nullable String apiBaseUrl) {
         if (apiBaseUrl == null || apiBaseUrl.isEmpty())
             apiBaseUrl = "https://api.mclo.gs/";
 
@@ -52,7 +56,7 @@ public class Instance {
      * Get the base URL for viewing logs
      * @return the base URL for viewing logs
      */
-    public String getViewLogUrl() {
+    public @Nullable String getViewLogUrl() {
         return viewLogUrl;
     }
 
@@ -70,7 +74,7 @@ public class Instance {
      * @param viewLogUrl the base URL for viewing logs (e.g. <a href="https://mclo.gs/">https://mclo.gs/</a>)
      * @return this
      */
-    public Instance setViewLogUrl(String viewLogUrl) {
+    public Instance setViewLogUrl(@Nullable String viewLogUrl) {
         if (viewLogUrl == null || viewLogUrl.isEmpty())
             viewLogUrl = "https://mclo.gs/";
         this.viewLogUrl = ensureEndsWithSlash(viewLogUrl);

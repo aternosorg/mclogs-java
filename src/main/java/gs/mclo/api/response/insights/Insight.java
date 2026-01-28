@@ -1,5 +1,6 @@
 package gs.mclo.api.response.insights;
 
+@SuppressWarnings("NotNullFieldNotInitialized")
 public class Insight {
     /**
      * Problem: The problem message

@@ -2,15 +2,11 @@ package gs.mclo.api;
 
 import gs.mclo.api.response.Limits;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.zip.GZIPInputStream;
 
 public class Log {
     /**
@@ -46,6 +42,7 @@ public class Log {
      *     <li> up to two dots with numbers as used by BungeeCord
      *     <li> `.gz` for gzip compressed files
      * </ul>
+     *
      * @deprecated Use {@link LogReader#ALLOWED_FILE_NAME_PATTERN} instead
      */
     @Deprecated(since = "4.2", forRemoval = true)
@@ -53,10 +50,11 @@ public class Log {
 
     /**
      * Maximum length of log files that can be uploaded in bytes
+     *
      * @deprecated Since these limits configurable use {@link MclogsClient#getLimits()} to fetch them
      */
     @Deprecated(since = "4.2", forRemoval = true)
-    public static final int MAX_LOG_LENGTH = 10 * 1024 * 1024;
+    public static final int MAX_LOG_LENGTH = Limits.DEFAULT.getMaxLength();
 
     /**
      * Log content
@@ -65,6 +63,7 @@ public class Log {
 
     /**
      * Create a new Log from a Path
+     *
      * @param logFile Path to the log file, which must have a file extension of '.log' or '.txt'. The file extension may be suffixed by both `.0` and `.gz`
      * @throws IOException If an exception occurs while reading the logFile
      */
@@ -74,6 +73,7 @@ public class Log {
 
     /**
      * Create a new Log from a log reader
+     *
      * @param reader The log reader to read the log from
      * @throws IOException If an exception occurs while reading the logFile
      */
@@ -83,6 +83,7 @@ public class Log {
 
     /**
      * Create a new Log
+     *
      * @param content The whole content of the log to share.
      */
     public Log(String content) {
@@ -92,7 +93,8 @@ public class Log {
 
     /**
      * Create a new Log
-     * @param dir The parent directory of the log file
+     *
+     * @param dir  The parent directory of the log file
      * @param file The log file, which must have a file extension of '.log' or '.txt'. The file extension may be suffixed by both `.0` and `.gz`
      * @throws IOException If an exception occurs while reading the logFile
      * @deprecated Use {@link Log#Log(Path)} instead
@@ -128,11 +130,12 @@ public class Log {
 
     /**
      * does this IPv4 address match any whitelist filters
+     *
      * @param s string to test
      * @return matches
      */
     private boolean isWhitelistedIPv4(String s) {
-        for (Pattern filter: IPV4_FILTER) {
+        for (Pattern filter : IPV4_FILTER) {
             if (s.matches(filter.pattern())) {
                 return true;
             }
@@ -158,11 +161,12 @@ public class Log {
 
     /**
      * does this IPv6 address match any whitelist filters
+     *
      * @param s string to test
      * @return matches
      */
     private boolean isWhitelistedIPv6(String s) {
-        for (Pattern filter: IPV6_FILTER) {
+        for (Pattern filter : IPV6_FILTER) {
             if (s.matches(filter.pattern())) {
                 return true;
             }

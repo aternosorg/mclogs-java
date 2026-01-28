@@ -1,39 +1,41 @@
 package gs.mclo.api.response;
 
 import gs.mclo.api.response.insights.Analysis;
+import org.jetbrains.annotations.Nullable;
 
+@SuppressWarnings("FieldMayBeFinal")
 public class InsightsResponse extends JsonResponse {
 
     /**
      * ID of detected log (name/type) e.g. "vanilla/server"
      */
-    private String id = null;
+    private @Nullable String id = null;
 
     /**
      * Software name, e.g. "Vanilla"
      */
-    private String name = null;
+    private @Nullable String name = null;
 
     /**
      * Software type, e.g. "server"
      */
-    private String type = null;
+    private @Nullable String type = null;
 
     /**
      * Combined title, e.g. "Vanilla 1.12.2 Server Log"
      */
-    private String title = null;
+    private @Nullable String title = null;
 
     /**
      * Information obtained from the analysis of the log
      */
-    private Analysis analysis = null;
+    private @Nullable Analysis analysis = null;
 
     /**
      * Get the ID of detected log (name/type) e.g. "vanilla/server"
      * @return the ID of detected log (name/type) e.g. "vanilla/server"
      */
-    public String getId() {
+    public @Nullable String getId() {
         return id;
     }
 
@@ -41,7 +43,7 @@ public class InsightsResponse extends JsonResponse {
      * Get the software name, e.g. "Vanilla"
      * @return the software name, e.g. "Vanilla"
      */
-    public String getName() {
+    public @Nullable String getName() {
         return name;
     }
 
@@ -49,7 +51,7 @@ public class InsightsResponse extends JsonResponse {
      * Get the software type, e.g. "server"
      * @return the software type, e.g. "server"
      */
-    public String getType() {
+    public @Nullable String getType() {
         return type;
     }
 
@@ -57,7 +59,7 @@ public class InsightsResponse extends JsonResponse {
      * Get the combined title, e.g. "Vanilla 1.12.2 Server Log"
      * @return the combined title, e.g. "Vanilla 1.12.2 Server Log"
      */
-    public String getTitle() {
+    public @Nullable String getTitle() {
         return title;
     }
 
@@ -65,7 +67,7 @@ public class InsightsResponse extends JsonResponse {
      * Get the information obtained from the analysis of the log
      * @return the information obtained from the analysis of the log
      */
-    public Analysis getAnalysis() {
+    public @Nullable Analysis getAnalysis() {
         return analysis;
     }
 }

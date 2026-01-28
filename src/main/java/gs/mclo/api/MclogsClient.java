@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import gs.mclo.api.response.InsightsResponse;
 import gs.mclo.api.response.Limits;
 import gs.mclo.api.response.UploadLogResponse;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.net.URI;
@@ -24,12 +25,12 @@ public class MclogsClient {
             .followRedirects(HttpClient.Redirect.NORMAL)
             .build();
 
-    private String projectName = null;
-    private String projectVersion = null;
+    private @Nullable String projectName = null;
+    private @Nullable String projectVersion = null;
 
-    private String minecraftVersion = null;
+    private @Nullable String minecraftVersion = null;
 
-    private String customUserAgent = null;
+    private @Nullable String customUserAgent = null;
 
     private Instance instance = new Instance();
 
@@ -63,7 +64,7 @@ public class MclogsClient {
      * @param projectVersion   the version of your project (used for the user agent)
      * @param minecraftVersion the version of minecraft (used for the user agent)
      */
-    public MclogsClient(String projectName, String projectVersion, String minecraftVersion) {
+    public MclogsClient(String projectName, String projectVersion, @Nullable String minecraftVersion) {
         this.setProjectName(projectName);
         this.setProjectVersion(projectVersion);
         this.setMinecraftVersion(minecraftVersion);
@@ -76,6 +77,7 @@ public class MclogsClient {
      * @return this
      */
     public MclogsClient setCustomUserAgent(String customUserAgent) {
+        //noinspection ConstantValue
         if (customUserAgent == null || customUserAgent.isEmpty())
             throw new IllegalArgumentException("Custom user agent must not be null or empty");
 
@@ -90,6 +92,7 @@ public class MclogsClient {
      * @return this
      */
     public MclogsClient setProjectName(String projectName) {
+        //noinspection ConstantValue
         if (projectName == null || projectName.isEmpty())
             throw new IllegalArgumentException("Project name must not be null or empty");
         this.projectName = projectName;
@@ -103,6 +106,7 @@ public class MclogsClient {
      * @return this
      */
     public MclogsClient setProjectVersion(String projectVersion) {
+        //noinspection ConstantValue
         if (projectVersion == null || projectVersion.isEmpty())
             throw new IllegalArgumentException("Project version must not be null or empty");
         this.projectVersion = projectVersion;
@@ -115,7 +119,7 @@ public class MclogsClient {
      * @param minecraftVersion the version of minecraft
      * @return this
      */
-    public MclogsClient setMinecraftVersion(String minecraftVersion) {
+    public MclogsClient setMinecraftVersion(@Nullable String minecraftVersion) {
         this.minecraftVersion = minecraftVersion;
         return this;
     }
@@ -236,6 +240,7 @@ public class MclogsClient {
 
     /**
      * Analyse a log with mclogs without saving it
+     *
      * @param log the log to analyse
      * @return the insights of the log
      */
@@ -281,6 +286,7 @@ public class MclogsClient {
 
     /**
      * Get the storage limits of this mclogs instance
+     *
      * @return the storage limits
      */
     public CompletableFuture<Limits> getLimits() {
@@ -296,37 +302,41 @@ public class MclogsClient {
 
     /**
      * List logs in the {@code logs} subdirectory of a path
+     *
      * @param directory server/client directory
      * @return log file names
      */
-    public String[] listLogsInDirectory(Path directory){
+    public String[] listLogsInDirectory(Path directory) {
         return Util.listFilesInDirectory(directory.resolve("logs"));
     }
 
     /**
      * List logs in the {@code logs} subdirectory of a path
+     *
      * @param directory server/client directory
      * @return log file names
      */
-    public String[] listLogsInDirectory(String directory){
+    public String[] listLogsInDirectory(String directory) {
         return listLogsInDirectory(Path.of(directory));
     }
 
     /**
      * List logs in the {@code crash-reports} subdirectory of a path
+     *
      * @param directory server/client directory
      * @return log file names
      */
-    public String[] listCrashReportsInDirectory(Path directory){
+    public String[] listCrashReportsInDirectory(Path directory) {
         return Util.listFilesInDirectory(directory.resolve("crash-reports"));
     }
 
     /**
      * List logs in the {@code crash-reports} subdirectory of a path
+     *
      * @param directory server/client directory
      * @return log file names
      */
-    public String[] listCrashReportsInDirectory(String directory){
+    public String[] listCrashReportsInDirectory(String directory) {
         return listCrashReportsInDirectory(Path.of(directory));
     }
 
