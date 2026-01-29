@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -90,6 +91,33 @@ public class MclogsClientTest extends ApiTest {
                 .thenCompose(res -> {
                     assertNotNull(res.getId());
                     assertNotNull(res.getUrl());
+                    assertNotNull(res.getRawUrl());
+                    assertEquals("mclogs-java-tests", res.getSource());
+
+                    assertNotNull(res.getCreated());
+                    assertTrue(res.getCreated().isAfter(Instant.ofEpochSecond(1769690721)), "Expected log to be created after this test was written");
+                    assertTrue(res.getCreated().isBefore(Instant.ofEpochSecond(1769690721000L)), "Expected log to be created within the next 50k years");
+
+                    assertNotNull(res.getExpires());
+                    assertTrue(res.getExpires().isAfter(Instant.ofEpochSecond(1769690721)), "Expected log to expire after this test was written");
+                    assertTrue(res.getExpires().isBefore(Instant.ofEpochSecond(1769690721000L)), "Expected log expire within the next 50k years");
+
+                    assertNotNull(res.getSize());
+                    assertTrue(res.getSize() > 10, "Expected log size to be greater than 10 bytes");
+
+                    assertNotNull(res.getLines());
+                    assertEquals(1, res.getLines());
+                    assertEquals(0, res.getErrors());
+
+                    assertNotNull(res.getToken());
+                    assertEquals(1, res.getMetadata().size());
+
+                    Metadata<?> metadata = res.getMetadata().iterator().next();
+                    assertEquals("key-a", metadata.getKey());
+                    assertEquals("value-a", metadata.getValue());
+                    assertEquals("Label A", metadata.getLabel());
+                    assertTrue(metadata.isVisible());
+
                     return res.getRawContent()
                         .thenAccept(content -> assertEquals(TestUtil.getFileContents("src/test/resources/logs/one.log"), content));
                 })

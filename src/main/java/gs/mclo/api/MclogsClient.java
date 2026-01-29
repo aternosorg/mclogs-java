@@ -1,6 +1,8 @@
 package gs.mclo.api;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import gs.mclo.api.internal.gson.InstantTypeAdapter;
 import gs.mclo.api.internal.request.UploadLogRequestBody;
 import gs.mclo.api.response.*;
 import gs.mclo.api.internal.JsonBodyHandler;
@@ -16,12 +18,14 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
 public class MclogsClient {
-
-    private final Gson gson = new Gson();
+    private final Gson gson = new GsonBuilder()
+            .registerTypeAdapter(Instant.class, new InstantTypeAdapter())
+            .create();
     private final HttpClient httpClient = HttpClient.newBuilder()
             .version(HttpClient.Version.HTTP_2)
             .followRedirects(HttpClient.Redirect.NORMAL)

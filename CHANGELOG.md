@@ -13,6 +13,7 @@
 
 ## New Features
 - You can now specify a source and other metadata when uploading logs.
+- Uploading a log now returns many new fields if your mclogs instance is up-to-date
 
 ## Improvements
 
