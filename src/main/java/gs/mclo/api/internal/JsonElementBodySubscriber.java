@@ -64,6 +64,12 @@ public final class JsonElementBodySubscriber implements HttpResponse.BodySubscri
 
     @Override
     public void onComplete() {
+        try {
+            outputStream.close();
+        } catch (IOException e) {
+            result.completeExceptionally(e);
+            return;
+        }
         result.complete(JsonParser.parseReader(reader));
     }
 }
