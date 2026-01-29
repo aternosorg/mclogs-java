@@ -2,11 +2,13 @@ package gs.mclo.api;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import gs.mclo.api.data.LogField;
 import gs.mclo.api.internal.JsonBodyHandler;
 import gs.mclo.api.internal.RequestBuilder;
 import gs.mclo.api.internal.Util;
 import gs.mclo.api.internal.gson.InstantTypeAdapter;
 import gs.mclo.api.internal.request.UploadLogRequestBody;
+import gs.mclo.api.response.GetLogResponse;
 import gs.mclo.api.response.InsightsResponse;
 import gs.mclo.api.response.Limits;
 import gs.mclo.api.response.UploadLogResponse;
@@ -19,6 +21,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
@@ -281,6 +284,25 @@ public class MclogsClient {
                 .GET()
                 .build();
         return asyncRequest(request, Limits.class);
+    }
+
+    /**
+     * Fetch a log with optional fields
+     * @param id id of the log to fetch
+     * @param fields Which optional log fields to include
+     * @return the log
+     */
+    public CompletableFuture<GetLogResponse> getLog(String id, LogField... fields) {
+        var uri = instance.getLogUrl(id);
+        if (fields.length > 0) {
+            uri += "?" + String.join("&", Arrays.stream(fields).map(LogField::getName).toArray(String[]::new));
+        }
+
+        HttpRequest request = requestBuilder.request(uri)
+                .header("Accept", "application/json")
+                .GET()
+                .build();
+        return asyncRequest(request, GetLogResponse.class);
     }
 
     /**

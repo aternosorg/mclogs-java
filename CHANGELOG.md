@@ -7,6 +7,7 @@
   - Removed `ApiException#getResponse` and `JsonResponse#throwIfError` methods.
   - Remove `JsonResponse`
   - Remove the `success` and `error` fields from response objects.
+- Some response classes from `response.insights` have been moved to `response.entry`.
 - Many classes have been marked as final or not-extendable.
 - `LimitedReader` and `Util` are now internal
 - Removed deprecated constants and constructor from the `Log` class.
@@ -15,7 +16,8 @@
 - You can now specify a source and other metadata when uploading logs.
 - You can delete logs after uploading them using `UploadLogResponse#delete()` or `MclogsClient#deleteLog(id, token)`
   with the token from the upload response.
-- Uploading a log now returns many new fields if your mclogs instance is up-to-date
+- Uploading a log now returns many new fields
+- These new fields, the raw content, the parsed log entries and insights can now be fetched with a single request.
 
 ## Improvements
 

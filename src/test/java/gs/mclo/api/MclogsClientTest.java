@@ -1,5 +1,6 @@
 package gs.mclo.api;
 
+import gs.mclo.api.data.LogField;
 import gs.mclo.api.data.Metadata;
 import gs.mclo.api.util.TestUtil;
 import org.junit.jupiter.api.Test;
@@ -188,6 +189,47 @@ public class MclogsClientTest extends ApiTest {
                                 assertEquals(content, raw);
                                 return res.delete();
                             });
+                })
+                .orTimeout(10, TimeUnit.SECONDS)
+                .join();
+    }
+
+    @Test
+    void getLogNone() {
+        client.uploadLog(Paths.get("src/test/resources/logs/three.log.gz"))
+                .thenCompose(res -> {
+                    assertNotNull(res.getId());
+                    assertNotNull(res.getUrl());
+                    return res.get().thenAccept(log -> {
+                        assertNotNull(log);
+                        assertEquals(res.getId(), log.getId());
+                        assertEquals(res.getSize(), log.getSize());
+                        assertNull(log.getContent());
+                    }).thenCompose(v -> res.delete());
+                })
+                .orTimeout(10, TimeUnit.SECONDS)
+                .join();
+    }
+
+    @Test
+    void getLogAll() {
+        var raw = "Test Log";
+        client.uploadLog(raw)
+                .thenCompose(res -> {
+                    assertNotNull(res.getId());
+                    assertNotNull(res.getUrl());
+                    return res.get(LogField.RAW, LogField.PARSED, LogField.INSIGHTS).thenAccept(log -> {
+                        assertNotNull(log);
+                        assertEquals(res.getId(), log.getId());
+                        assertEquals(res.getSize(), log.getSize());
+                        assertNotNull(log.getContent());
+                        assertNotNull(log.getContent().getRaw());
+                        assertEquals(raw, log.getContent().getRaw());
+                        assertNotNull(log.getContent().getParsed());
+                        assertEquals(1, log.getContent().getParsed().length);
+                        assertNotNull(log.getContent().getInsights());
+                        assertEquals("unknown/unknown", log.getContent().getInsights().getId());
+                    }).thenCompose(v -> res.delete());
                 })
                 .orTimeout(10, TimeUnit.SECONDS)
                 .join();

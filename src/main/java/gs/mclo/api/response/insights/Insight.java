@@ -1,5 +1,6 @@
 package gs.mclo.api.response.insights;
 
+import gs.mclo.api.response.entry.Entry;
 import org.jetbrains.annotations.ApiStatus;
 
 @SuppressWarnings("NotNullFieldNotInitialized")

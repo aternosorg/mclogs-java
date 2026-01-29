@@ -1,4 +1,4 @@
-package gs.mclo.api.response.insights;
+package gs.mclo.api.response.entry;
 
 @SuppressWarnings("NotNullFieldNotInitialized")
 public final class Line {

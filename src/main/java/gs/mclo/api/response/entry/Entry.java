@@ -1,12 +1,12 @@
-package gs.mclo.api.response.insights;
+package gs.mclo.api.response.entry;
 
 import org.jetbrains.annotations.Nullable;
 
-@SuppressWarnings("NotNullFieldNotInitialized")
+@SuppressWarnings({"unused"})
 public final class Entry {
     /**
      * The level of the entry.
-     * Use {@link gs.mclo.api.response.insights.Level} to get the level name.
+     * Use {@link Level} to get the level name.
      */
     private int level;
 

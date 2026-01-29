@@ -3,7 +3,6 @@ package gs.mclo.api.internal;
 import com.google.gson.JsonElement;
 import gs.mclo.api.APIException;
 import gs.mclo.api.MclogsClient;
-import gs.mclo.api.response.Initializable;
 
 import java.net.http.HttpResponse;
 import java.util.concurrent.CompletionException;
