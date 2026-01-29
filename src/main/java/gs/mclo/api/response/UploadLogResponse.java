@@ -139,6 +139,14 @@ public final class UploadLogResponse implements Initializable {
         return client().getInsights(id);
     }
 
+    /**
+     * Delete this log from the instance
+     * @return a future that completes when the log has been deleted
+     */
+    public CompletableFuture<Void> delete() {
+        return client().deleteLog(id, token);
+    }
+
     private MclogsClient client() {
         return Objects.requireNonNull(client);
     }

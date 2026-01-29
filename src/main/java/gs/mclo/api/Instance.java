@@ -121,4 +121,13 @@ public final class Instance {
     public String getStorageLimitUrl() {
         return apiBaseUrl + "1/limits";
     }
+
+    /**
+     * Get the URL for a log
+     * @param id the ID of the log (e.g. HpAwPry)
+     * @return the URL for the log (e.g. <a href="https://api.mclo.gs/1/log/HpAwPry">https://api.mclo.gs/1/log/HpAwPry</a>)
+     */
+    public String getLogUrl(String id) {
+        return apiBaseUrl + "1/log/" + id;
+    }
 }

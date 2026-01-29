@@ -1,14 +1,12 @@
 package gs.mclo.api.internal;
 
 import gs.mclo.api.LogReader;
-import org.jetbrains.annotations.ApiStatus;
 
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Arrays;
 
-@ApiStatus.Internal
-public class Util {
+public final class Util {
 
     /**
      * List all files in a directory that match the allowed file name pattern

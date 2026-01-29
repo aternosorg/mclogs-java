@@ -71,7 +71,10 @@ public class MclogsClientTest extends ApiTest {
                     assertNotNull(res.getId());
                     assertNotNull(res.getUrl());
                     return res.getRawContent()
-                        .thenAccept(content -> assertEquals(TestUtil.getFileContents("src/test/resources/logs/one.log"), content));
+                            .thenCompose(content -> {
+                                assertEquals(TestUtil.getFileContents("src/test/resources/logs/one.log"), content);
+                                return res.delete();
+                            });
                 })
                 .orTimeout(10, TimeUnit.SECONDS)
                 .join();
@@ -119,7 +122,10 @@ public class MclogsClientTest extends ApiTest {
                     assertTrue(metadata.isVisible());
 
                     return res.getRawContent()
-                        .thenAccept(content -> assertEquals(TestUtil.getFileContents("src/test/resources/logs/one.log"), content));
+                            .thenCompose(content -> {
+                                assertEquals(TestUtil.getFileContents("src/test/resources/logs/one.log"), content);
+                                return res.delete();
+                            });
                 })
                 .orTimeout(10, TimeUnit.SECONDS)
                 .join();
@@ -132,7 +138,10 @@ public class MclogsClientTest extends ApiTest {
                     assertNotNull(res.getId());
                     assertNotNull(res.getUrl());
                     return res.getRawContent()
-                        .thenAccept(content -> assertEquals(TestUtil.getGZIPFileContents("src/test/resources/logs/three.log.gz"), content));
+                            .thenCompose(content -> {
+                                assertEquals(TestUtil.getGZIPFileContents("src/test/resources/logs/three.log.gz"), content);
+                                return res.delete();
+                            });
                 })
                 .orTimeout(10, TimeUnit.SECONDS)
                 .join();
@@ -157,13 +166,6 @@ public class MclogsClientTest extends ApiTest {
         assertThrows(IllegalArgumentException.class, () -> new MclogsClient("a", ""));
         assertDoesNotThrow(() -> new MclogsClient("project", "1.0.0"));
         assertDoesNotThrow(() -> new MclogsClient("project", "1.0.0", "1.12.2"));
-        assertDoesNotThrow(() -> {
-            MclogsClient client = new MclogsClient("project", "1.0.0")
-                    .setProjectName("asd")
-                    .setMinecraftVersion("1.12.2")
-                    .setProjectVersion("1.0.0");
-            assertEquals("asd/1.0.0 (Minecraft 1.12.2)", client.getUserAgent());
-        });
     }
 
     @Test
@@ -181,7 +183,11 @@ public class MclogsClientTest extends ApiTest {
                     assertNotNull(res.getId());
                     assertNotNull(res.getUrl());
                     System.out.println("Test log has been shared at " + res.getUrl());
-                    return res.getRawContent().thenAccept(raw -> assertEquals(content, raw));
+                    return res.getRawContent()
+                            .thenCompose(raw -> {
+                                assertEquals(content, raw);
+                                return res.delete();
+                            });
                 })
                 .orTimeout(10, TimeUnit.SECONDS)
                 .join();
@@ -193,12 +199,12 @@ public class MclogsClientTest extends ApiTest {
                 .thenCompose(res -> {
                     assertNotNull(res.getId());
                     assertNotNull(res.getUrl());
-                    return res.getInsights();
-                }).thenAccept(insights -> {
-                    assertNotNull(insights);
-                    assertNotNull(insights.getAnalysis());
-                    assertNotNull(insights.getAnalysis().getInformation());
-                    assertNotNull(insights.getAnalysis().getProblems());
+                    return res.getInsights().thenAccept(insights -> {
+                        assertNotNull(insights);
+                        assertNotNull(insights.getAnalysis());
+                        assertNotNull(insights.getAnalysis().getInformation());
+                        assertNotNull(insights.getAnalysis().getProblems());
+                    }).thenCompose(v -> res.delete());
                 })
                 .orTimeout(10, TimeUnit.SECONDS)
                 .join();

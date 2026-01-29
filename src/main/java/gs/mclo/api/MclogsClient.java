@@ -2,21 +2,21 @@ package gs.mclo.api;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import gs.mclo.api.internal.JsonBodyHandler;
+import gs.mclo.api.internal.RequestBuilder;
+import gs.mclo.api.internal.Util;
 import gs.mclo.api.internal.gson.InstantTypeAdapter;
 import gs.mclo.api.internal.request.UploadLogRequestBody;
-import gs.mclo.api.response.*;
-import gs.mclo.api.internal.JsonBodyHandler;
-import gs.mclo.api.internal.Util;
+import gs.mclo.api.response.InsightsResponse;
+import gs.mclo.api.response.Limits;
+import gs.mclo.api.response.UploadLogResponse;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.concurrent.CompletableFuture;
@@ -31,14 +31,8 @@ public class MclogsClient {
             .followRedirects(HttpClient.Redirect.NORMAL)
             .build();
 
-    private @Nullable String projectName = null;
-    private @Nullable String projectVersion = null;
-
-    private @Nullable String minecraftVersion = null;
-
-    private @Nullable String customUserAgent = null;
-
     private Instance instance = new Instance();
+    private final RequestBuilder requestBuilder = new RequestBuilder();
 
     /**
      * Create a new Mclogs instance with a custom user agent
@@ -83,11 +77,7 @@ public class MclogsClient {
      * @return this
      */
     public MclogsClient setCustomUserAgent(String customUserAgent) {
-        //noinspection ConstantValue
-        if (customUserAgent == null || customUserAgent.isEmpty())
-            throw new IllegalArgumentException("Custom user agent must not be null or empty");
-
-        this.customUserAgent = customUserAgent;
+        requestBuilder.setCustomUserAgent(customUserAgent);
         return this;
     }
 
@@ -98,10 +88,7 @@ public class MclogsClient {
      * @return this
      */
     public MclogsClient setProjectName(String projectName) {
-        //noinspection ConstantValue
-        if (projectName == null || projectName.isEmpty())
-            throw new IllegalArgumentException("Project name must not be null or empty");
-        this.projectName = projectName;
+        requestBuilder.setProjectName(projectName);
         return this;
     }
 
@@ -112,10 +99,7 @@ public class MclogsClient {
      * @return this
      */
     public MclogsClient setProjectVersion(String projectVersion) {
-        //noinspection ConstantValue
-        if (projectVersion == null || projectVersion.isEmpty())
-            throw new IllegalArgumentException("Project version must not be null or empty");
-        this.projectVersion = projectVersion;
+        requestBuilder.setProjectVersion(projectVersion);
         return this;
     }
 
@@ -126,25 +110,8 @@ public class MclogsClient {
      * @return this
      */
     public MclogsClient setMinecraftVersion(@Nullable String minecraftVersion) {
-        this.minecraftVersion = minecraftVersion;
+        requestBuilder.setMinecraftVersion(minecraftVersion);
         return this;
-    }
-
-    /**
-     * @return the complete user agent
-     */
-    protected String getUserAgent() {
-        if (this.customUserAgent != null) {
-            return this.customUserAgent;
-        }
-
-        String userAgent = this.projectName + "/" + this.projectVersion;
-
-        if (this.minecraftVersion != null) {
-            userAgent += " (Minecraft " + this.minecraftVersion + ")";
-        }
-
-        return userAgent;
     }
 
     /**
@@ -166,25 +133,6 @@ public class MclogsClient {
     }
 
     /**
-     * Upload a log to mclogs with metadata and a source.
-     *
-     * @param body the log to upload with optional parameters
-     * @return the response
-     */
-    public CompletableFuture<UploadLogResponse> uploadLog(UploadLogRequestBody body) {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(instance.getLogUploadUrl()))
-                .header("Content-Type", "application/json")
-                .header("Accept", "application/json")
-                .header("User-Agent", this.getUserAgent())
-                .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(body)))
-                .build();
-        return asyncRequest(request, UploadLogResponse.class);
-        // TODO: Catch unsupported media type and retry with form data?
-        // TODO: Somehow make limits pass along in more cases
-    }
-
-    /**
      * Upload a log to mclogs
      *
      * @param log the log to upload
@@ -192,11 +140,9 @@ public class MclogsClient {
      */
     public CompletableFuture<UploadLogResponse> uploadLog(Log log) {
         // Try new upload method
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(instance.getLogUploadUrl()))
+        HttpRequest request = requestBuilder.request(instance.getLogUploadUrl())
                 .header("Content-Type", "application/json")
                 .header("Accept", "application/json")
-                .header("User-Agent", this.getUserAgent())
                 .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(new UploadLogRequestBody(log.getContent(), log.getSource(), log.getMetadata()))))
                 .build();
 
@@ -212,7 +158,7 @@ public class MclogsClient {
                 APIException apiException = (APIException) throwable.getCause();
                 if (apiException.getMessage().contains("Required POST argument 'content' not found")) {
                     // Fallback to old upload method
-                    HttpRequest fallbackRequest = this.uploadRequest(instance.getLogUploadUrl(), log);
+                    HttpRequest fallbackRequest = requestBuilder.legacyUpload(instance.getLogUploadUrl(), log);
                     return asyncRequest(fallbackRequest, UploadLogResponse.class);
                 }
             }
@@ -260,10 +206,7 @@ public class MclogsClient {
      * @return the raw contents of the log
      */
     public CompletableFuture<String> getRawLogContent(String logId) {
-        HttpRequest request = HttpRequest
-                .newBuilder()
-                .uri(URI.create(instance.getRawLogUrl(logId)))
-                .header("User-Agent", this.getUserAgent())
+        HttpRequest request = requestBuilder.request(instance.getRawLogUrl(logId))
                 .GET()
                 .build();
         return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString()).thenApply(HttpResponse::body);
@@ -276,10 +219,7 @@ public class MclogsClient {
      * @return the insights for the log
      */
     public CompletableFuture<InsightsResponse> getInsights(String logId) {
-        HttpRequest request = HttpRequest
-                .newBuilder()
-                .uri(URI.create(instance.getLogInsightsUrl(logId)))
-                .header("User-Agent", this.getUserAgent())
+        HttpRequest request = requestBuilder.request(instance.getLogInsightsUrl(logId))
                 .header("Accept", "application/json")
                 .GET()
                 .build();
@@ -293,7 +233,7 @@ public class MclogsClient {
      * @return the insights of the log
      */
     public CompletableFuture<InsightsResponse> analyseLog(Log log) {
-        HttpRequest request = uploadRequest(instance.getLogAnalysisUrl(), log);
+        HttpRequest request = requestBuilder.legacyUpload(instance.getLogAnalysisUrl(), log);
         return asyncRequest(request, InsightsResponse.class);
     }
 
@@ -330,21 +270,31 @@ public class MclogsClient {
                 });
     }
 
-
     /**
      * Get the storage limits of this mclogs instance
      *
      * @return the storage limits
      */
     public CompletableFuture<Limits> getLimits() {
-        HttpRequest request = HttpRequest
-                .newBuilder()
-                .uri(URI.create(instance.getStorageLimitUrl()))
-                .header("User-Agent", this.getUserAgent())
+        HttpRequest request = requestBuilder.request(instance.getStorageLimitUrl())
                 .header("Accept", "application/json")
                 .GET()
                 .build();
         return asyncRequest(request, Limits.class);
+    }
+
+    /**
+     * Delete a log
+     * @param id id of the log to delete
+     * @param token deletion token of the log to delete
+     * @return a future that completes when the log is deleted
+     */
+    public CompletableFuture<Void> deleteLog(String id, @Nullable String token) {
+        HttpRequest request = requestBuilder.request(instance.getLogUrl(id))
+                .header("Authorization", "Bearer " + token)
+                .DELETE()
+                .build();
+        return asyncRequest(request, Void.class).thenAccept(x -> {});
     }
 
     /**
@@ -390,16 +340,6 @@ public class MclogsClient {
     private <T> CompletableFuture<T> asyncRequest(HttpRequest request, Class<T> responseClass) {
         return httpClient.sendAsync(request, new JsonBodyHandler<>(this, responseClass))
                 .thenApply(HttpResponse::body);
-    }
-
-    private HttpRequest uploadRequest(String url, Log log) {
-        return HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .header("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
-                .header("Accept", "application/json")
-                .header("User-Agent", this.getUserAgent())
-                .POST(HttpRequest.BodyPublishers.ofString("content=" + URLEncoder.encode(log.getContent(), StandardCharsets.UTF_8)))
-                .build();
     }
 
     @ApiStatus.Internal

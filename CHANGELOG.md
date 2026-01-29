@@ -13,6 +13,8 @@
 
 ## New Features
 - You can now specify a source and other metadata when uploading logs.
+- You can delete logs after uploading them using `UploadLogResponse#delete()` or `MclogsClient#deleteLog(id, token)`
+  with the token from the upload response.
 - Uploading a log now returns many new fields if your mclogs instance is up-to-date
 
 ## Improvements
