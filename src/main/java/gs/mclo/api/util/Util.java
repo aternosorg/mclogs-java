@@ -3,13 +3,9 @@ package gs.mclo.api.util;
 import gs.mclo.api.LogReader;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.io.*;
-import java.nio.file.Files;
+import java.io.File;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.stream.Collectors;
-import java.util.zip.GZIPInputStream;
 
 @ApiStatus.Internal
 public class Util {
@@ -41,36 +37,5 @@ public class Util {
      */
     public static String[] listFilesInDirectory(Path directory) {
         return listFilesInDirectory(directory.toFile());
-    }
-
-    /**
-     * parse an input stream to a string
-     * @param is input stream
-     * @return stream content
-     */
-    public static String inputStreamToString (InputStream is) {
-        return new BufferedReader(new InputStreamReader(is))
-                .lines()
-                .collect(Collectors.joining("\n"));
-    }
-
-    /**
-     * Get the contents of the file located at this path
-     * @param path path to file
-     * @return file content
-     * @throws IOException error reading file
-     */
-    public static String getFileContents(String path) throws IOException {
-        return Util.inputStreamToString(Files.newInputStream(Paths.get(path)));
-    }
-
-    /**
-     * Get the contents of the GZIP compressed file located at this path
-     * @param path path to file
-     * @return file content
-     * @throws IOException error reading file
-     */
-    public static String getGZIPFileContents(String path) throws IOException {
-        return Util.inputStreamToString(new GZIPInputStream(Files.newInputStream(Paths.get(path))));
     }
 }

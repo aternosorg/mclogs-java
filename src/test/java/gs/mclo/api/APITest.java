@@ -3,6 +3,7 @@ package gs.mclo.api;
 import gs.mclo.api.response.InsightsResponse;
 import gs.mclo.api.response.Limits;
 import gs.mclo.api.response.UploadLogResponse;
+import gs.mclo.api.util.TestUtil;
 import gs.mclo.api.util.Util;
 import org.junit.jupiter.api.Test;
 
@@ -71,7 +72,7 @@ public class APITest extends BaseApiTest {
             assertNotNull(res.getId());
             assertNotNull(res.getUrl());
             CompletableFuture<String> rawLog = res.getRawContent();
-            assertEquals(Util.getFileContents("src/test/resources/logs/one.log"), rawLog.get());
+            assertEquals(TestUtil.getFileContents("src/test/resources/logs/one.log"), rawLog.get());
 
             System.out.println("Test log has been shared at " + res.getUrl());
         });
@@ -85,7 +86,7 @@ public class APITest extends BaseApiTest {
             assertNotNull(res.getId());
             assertNotNull(res.getUrl());
             CompletableFuture<String> rawLog = res.getRawContent();
-            assertEquals(Util.getGZIPFileContents("src/test/resources/logs/three.log.gz"), rawLog.get());
+            assertEquals(TestUtil.getGZIPFileContents("src/test/resources/logs/three.log.gz"), rawLog.get());
 
             System.out.println("Gzip test log has been shared at " + res.getUrl());
         });
@@ -128,12 +129,12 @@ public class APITest extends BaseApiTest {
 
             MclogsClient client = new MclogsClient("aternos/mclogs-java-tests")
                     .setInstance(instance);
-            CompletableFuture<UploadLogResponse> response = client.uploadLog(Util.getFileContents("src/test/resources/logs/one.log"));
+            CompletableFuture<UploadLogResponse> response = client.uploadLog(TestUtil.getFileContents("src/test/resources/logs/one.log"));
             UploadLogResponse res = response.get();
             assertNotNull(res.getId());
             assertNotNull(res.getUrl());
             CompletableFuture<String> rawLog = res.getRawContent();
-            assertEquals(Util.getFileContents("src/test/resources/logs/one.log"), rawLog.get());
+            assertEquals(TestUtil.getFileContents("src/test/resources/logs/one.log"), rawLog.get());
 
             System.out.println("Test log has been shared at " + res.getUrl());
         });
