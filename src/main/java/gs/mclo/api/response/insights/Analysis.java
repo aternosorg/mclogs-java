@@ -1,16 +1,20 @@
 package gs.mclo.api.response.insights;
 
 @SuppressWarnings("NotNullFieldNotInitialized")
-public class Analysis {
+public final class Analysis {
     /**
      * A list of detected problems
      */
-    protected Problem[] problems;
+    private Problem[] problems;
 
     /**
      * A list of detected information
      */
-    protected Information[] information;
+    private Information[] information;
+
+    private Analysis() {
+
+    }
 
     /**
      * A list of detected problems

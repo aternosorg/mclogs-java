@@ -8,7 +8,7 @@ import gs.mclo.api.response.Initializable;
 import java.net.http.HttpResponse;
 import java.util.concurrent.CompletionException;
 
-public class JsonBodyHandler<T> implements HttpResponse.BodyHandler<T> {
+public final class JsonBodyHandler<T> implements HttpResponse.BodyHandler<T> {
     private final MclogsClient client;
     private final Class<T> clazz;
 

@@ -1,6 +1,6 @@
 package gs.mlco.api;
 
-import gs.mclo.api.LimitedReader;
+import gs.mclo.api.util.LimitedReader;
 import org.openjdk.jmh.annotations.*;
 
 import java.io.*;

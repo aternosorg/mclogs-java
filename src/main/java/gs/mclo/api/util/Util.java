@@ -1,5 +1,6 @@
-package gs.mclo.api;
+package gs.mclo.api.util;
 
+import gs.mclo.api.LogReader;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.io.*;

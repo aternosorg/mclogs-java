@@ -3,28 +3,32 @@ package gs.mclo.api.response.insights;
 import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("NotNullFieldNotInitialized")
-public class Entry {
+public final class Entry {
     /**
      * The level of the entry.
      * Use {@link gs.mclo.api.response.insights.Level} to get the level name.
      */
-    protected int level;
+    private int level;
 
     /**
      * UNIX timestamp of the entry.
      * This is null for most logs as most software doesn't log dates.
      */
-    protected @Nullable Integer time;
+    private @Nullable Integer time;
 
     /**
      * The prefix of the entry.
      */
-    protected @Nullable String prefix;
+    private @Nullable String prefix;
 
     /**
      * The lines that make up the entry.
      */
-    protected Line[] lines;
+    private Line[] lines;
+
+    private Entry() {
+
+    }
 
     /**
      * The level of this entry.

@@ -7,6 +7,8 @@
   - Removed `ApiException#getResponse` and `JsonResponse#throwIfError` methods.
   - Remove `JsonResponse`
   - Remove the `success` and `error` fields from response objects.
+- Many classes have been marked as final or not-extendable.
+- `LimitedReader` and `Util` are now internal
 
 ## Improvements
 

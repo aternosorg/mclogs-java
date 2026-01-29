@@ -2,10 +2,9 @@ package gs.mclo.api;
 
 import org.jetbrains.annotations.Nullable;
 
-public class Instance {
-    @SuppressWarnings("NotNullFieldNotInitialized")
+@SuppressWarnings("NotNullFieldNotInitialized")
+public final class Instance {
     private String apiBaseUrl;
-    @SuppressWarnings("NotNullFieldNotInitialized")
     private String viewLogUrl;
 
     /**
@@ -25,7 +24,7 @@ public class Instance {
                 .setViewLogUrl(viewLogUrl);
     }
 
-    protected String ensureEndsWithSlash(String url) {
+    private String ensureEndsWithSlash(String url) {
         if (!url.endsWith("/"))
             url += "/";
         return url;
@@ -35,7 +34,7 @@ public class Instance {
      * Get the base URL for the API
      * @return the base URL for the API
      */
-    public @Nullable String getApiBaseUrl() {
+    public String getApiBaseUrl() {
         return apiBaseUrl;
     }
 
@@ -56,7 +55,7 @@ public class Instance {
      * Get the base URL for viewing logs
      * @return the base URL for viewing logs
      */
-    public @Nullable String getViewLogUrl() {
+    public String getViewLogUrl() {
         return viewLogUrl;
     }
 

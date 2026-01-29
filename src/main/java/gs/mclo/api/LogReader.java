@@ -1,6 +1,7 @@
 package gs.mclo.api;
 
 import gs.mclo.api.response.Limits;
+import gs.mclo.api.util.LimitedReader;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
@@ -10,7 +11,7 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
-public class LogReader {
+public final class LogReader {
     /**
      * Only allow logs with the file extension `.log` or `.txt` which may be suffixed by:
      * <ul>

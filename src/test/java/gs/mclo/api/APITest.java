@@ -3,6 +3,7 @@ package gs.mclo.api;
 import gs.mclo.api.response.InsightsResponse;
 import gs.mclo.api.response.Limits;
 import gs.mclo.api.response.UploadLogResponse;
+import gs.mclo.api.util.Util;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Paths;

@@ -1,8 +1,11 @@
 package gs.mclo.api.response.insights;
 
 @SuppressWarnings("NotNullFieldNotInitialized")
-public class Solution {
-    protected String message;
+public final class Solution {
+    private String message;
+
+    private Solution() {
+    }
 
     /**
      * @return the solution message

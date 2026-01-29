@@ -1,10 +1,13 @@
 package gs.mclo.api.response.insights;
 
 @SuppressWarnings("NotNullFieldNotInitialized")
-public class Line {
-    protected int number;
+public final class Line {
+    private int number;
 
-    protected String content;
+    private String content;
+
+    private Line() {
+    }
 
     /**
      * @return Line number

@@ -1,6 +1,9 @@
 package gs.mclo.api.response.insights;
 
+import org.jetbrains.annotations.ApiStatus;
+
 @SuppressWarnings("NotNullFieldNotInitialized")
+@ApiStatus.NonExtendable
 public class Insight {
     /**
      * Problem: The problem message
@@ -13,6 +16,10 @@ public class Insight {
     protected int counter;
 
     protected Entry entry;
+
+    protected Insight() {
+
+    }
 
     /**
      * Get the entry

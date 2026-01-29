@@ -3,7 +3,7 @@ package gs.mclo.api.response;
 import gs.mclo.api.response.insights.Analysis;
 
 @SuppressWarnings({"FieldMayBeFinal", "unused", "NotNullFieldNotInitialized"})
-public class InsightsResponse {
+public final class InsightsResponse {
 
     /**
      * ID of detected log (name/type) e.g. "vanilla/server"
@@ -29,6 +29,10 @@ public class InsightsResponse {
      * Information obtained from the analysis of the log
      */
     private Analysis analysis;
+
+    private InsightsResponse() {
+
+    }
 
     /**
      * Get the ID of detected log (name/type) e.g. "vanilla/server"

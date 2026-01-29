@@ -15,7 +15,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Flow;
 
-public class JsonElementBodySubscriber implements HttpResponse.BodySubscriber<JsonElement> {
+public final class JsonElementBodySubscriber implements HttpResponse.BodySubscriber<JsonElement> {
     private final CompletableFuture<JsonElement> result = new CompletableFuture<>();
     private final PipedOutputStream outputStream = new PipedOutputStream();
     private final JsonReader reader;

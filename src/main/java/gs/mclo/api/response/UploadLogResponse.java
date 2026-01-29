@@ -8,9 +8,13 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 @SuppressWarnings({"FieldMayBeFinal", "NotNullFieldNotInitialized", "unused"})
-public class UploadLogResponse implements Initializable {
+public final class UploadLogResponse implements Initializable {
     private String id;
     private transient @Nullable MclogsClient client;
+
+    private UploadLogResponse() {
+        
+    }
 
     @ApiStatus.Internal
     @Override
@@ -22,7 +26,7 @@ public class UploadLogResponse implements Initializable {
      * Get the log id
      * @return the log id (e.g. HpAwPry)
      */
-    public @Nullable String getId() {
+    public String getId() {
         return id;
     }
 

@@ -1,16 +1,20 @@
 package gs.mclo.api.response.insights;
 
 @SuppressWarnings("NotNullFieldNotInitialized")
-public class Information extends Insight {
+public final class Information extends Insight {
     /**
      * The label of this information e.g. "Minecraft Version"
      */
-    protected String label;
+    private String label;
 
     /**
      * The value of this information e.g. "1.12.2"
      */
-    protected String value;
+    private String value;
+
+    private Information() {
+
+    }
 
     /**
      * Get the label of this information

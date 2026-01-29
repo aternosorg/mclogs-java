@@ -1,4 +1,4 @@
-package gs.mclo.api;
+package gs.mclo.api.util;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -9,7 +9,7 @@ import java.util.Objects;
 /**
  * A Helper class that limits the number of bytes and/or lines read from a Reader.
  */
-public class LimitedReader extends Reader {
+public final class LimitedReader extends Reader {
     /**
      * The underlying reader
      */

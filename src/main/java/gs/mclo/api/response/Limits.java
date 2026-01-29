@@ -1,14 +1,12 @@
 package gs.mclo.api.response;
 
-import org.jetbrains.annotations.Nullable;
-
 import java.time.Duration;
 
 /**
  * Storage limits of a mclogs instance. This represents the response of the `/1/limits` endpoint.
  */
 public class Limits {
-    public static final @Nullable Limits DEFAULT = new Limits(
+    public static final Limits DEFAULT = new Limits(
             30 * 24 * 60 * 60,
             10 * 1024 * 1024,
             10000
