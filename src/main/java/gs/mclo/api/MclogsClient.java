@@ -8,6 +8,8 @@ import gs.mclo.api.internal.RequestBuilder;
 import gs.mclo.api.internal.Util;
 import gs.mclo.api.internal.gson.InstantTypeAdapter;
 import gs.mclo.api.internal.request.UploadLogRequestBody;
+import gs.mclo.api.reader.FileLogReader;
+import gs.mclo.api.reader.StringLogReader;
 import gs.mclo.api.response.GetLogResponse;
 import gs.mclo.api.response.InsightsResponse;
 import gs.mclo.api.response.Limits;
@@ -16,6 +18,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -176,7 +179,7 @@ public class MclogsClient {
      * @return the response
      */
     public CompletableFuture<UploadLogResponse> uploadLog(String log) {
-        return this.uploadLog(new Log(log));
+        return this.getLog(log).thenCompose(this::uploadLog);
     }
 
     /**
@@ -186,20 +189,7 @@ public class MclogsClient {
      * @return the response
      */
     public CompletableFuture<UploadLogResponse> uploadLog(Path log) {
-        return this.getLimits()
-                .handleAsync((limits, e) -> {
-                    if (e != null) {
-                        return new LogReader(log);
-                    }
-                    return new LogReader(log, limits);
-                })
-                .thenCompose(reader -> {
-                    try {
-                        return this.uploadLog(reader.readLog());
-                    } catch (IOException e) {
-                        throw new CompletionException(e);
-                    }
-                });
+        return this.getLog(log).thenCompose(this::uploadLog);
     }
 
     /**
@@ -247,7 +237,7 @@ public class MclogsClient {
      * @return the insights of the log
      */
     public CompletableFuture<InsightsResponse> analyseLog(String log) {
-        return this.analyseLog(new Log(log));
+        return this.getLog(log).thenCompose(this::analyseLog);
     }
 
     /**
@@ -257,20 +247,7 @@ public class MclogsClient {
      * @return the insights of the log
      */
     public CompletableFuture<InsightsResponse> analyseLog(Path log) {
-        return this.getLimits()
-                .handleAsync((limits, e) -> {
-                    if (e != null) {
-                        return new LogReader(log);
-                    }
-                    return new LogReader(log, limits);
-                })
-                .thenCompose(reader -> {
-                    try {
-                        return this.analyseLog(reader.readLog());
-                    } catch (IOException e) {
-                        throw new CompletionException(e);
-                    }
-                });
+        return this.getLog(log).thenCompose(this::analyseLog);
     }
 
     /**
@@ -288,7 +265,8 @@ public class MclogsClient {
 
     /**
      * Fetch a log with optional fields
-     * @param id id of the log to fetch
+     *
+     * @param id     id of the log to fetch
      * @param fields Which optional log fields to include
      * @return the log
      */
@@ -307,7 +285,8 @@ public class MclogsClient {
 
     /**
      * Delete a log
-     * @param id id of the log to delete
+     *
+     * @param id    id of the log to delete
      * @param token deletion token of the log to delete
      * @return a future that completes when the log is deleted
      */
@@ -316,7 +295,8 @@ public class MclogsClient {
                 .header("Authorization", "Bearer " + token)
                 .DELETE()
                 .build();
-        return asyncRequest(request, Void.class).thenAccept(x -> {});
+        return asyncRequest(request, Void.class).thenAccept(x -> {
+        });
     }
 
     /**
@@ -362,6 +342,30 @@ public class MclogsClient {
     private <T> CompletableFuture<T> asyncRequest(HttpRequest request, Class<T> responseClass) {
         return httpClient.sendAsync(request, new JsonBodyHandler<>(this, responseClass))
                 .thenApply(HttpResponse::body);
+    }
+
+    private CompletableFuture<Limits> getLimitsOrDefault() {
+        return this.getLimits().exceptionally(t -> Limits.DEFAULT);
+    }
+
+    private CompletableFuture<Log> getLog(Path log) {
+        return this.getLimitsOrDefault().thenApply(limits -> {
+            try {
+                return new Log(new FileLogReader(log, limits));
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        });
+    }
+
+    private CompletableFuture<Log> getLog(String log) {
+        return this.getLimitsOrDefault().thenApply(limits -> {
+            try {
+                return new Log(new StringLogReader(log, limits));
+            } catch (IOException e) {
+                throw new CompletionException(e);
+            }
+        });
     }
 
     @ApiStatus.Internal

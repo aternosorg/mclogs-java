@@ -1,6 +1,7 @@
 package gs.mlco.api;
 
 import gs.mclo.api.internal.LimitedReader;
+import gs.mclo.api.response.Limits;
 import org.openjdk.jmh.annotations.*;
 
 import java.io.*;
@@ -50,7 +51,7 @@ public class LimitedReaderBenchmark extends ReaderBenchmark {
     }
 
     private int test(Reader in, Integer byteLimit, Integer lineLimit) throws IOException {
-        try (Reader reader = new LimitedReader(in, byteLimit, lineLimit)) {
+        try (Reader reader = new LimitedReader(in, new Limits(1, byteLimit, lineLimit))) {
             StringWriter writer = new StringWriter();
             reader.transferTo(writer);
             return writer.toString().length();

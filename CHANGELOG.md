@@ -10,6 +10,7 @@
 - Some response classes from `response.insights` have been moved to `response.entry`.
 - Many classes have been marked as final or not-extendable.
 - `LimitedReader` and `Util` are now internal
+- `LogReader` has been split into multiple classes in the `reader` package.
 - Removed deprecated constants and constructor from the `Log` class.
 
 ## New Features
@@ -23,6 +24,7 @@
 
 - Remove exception that is never thrown from signature of `MclogsClient#analyseLog(Path)`
 - Add annotations for nullability where missing
+- Limits are now applied to all methods that upload logs before the upload happens
 
 ---
 

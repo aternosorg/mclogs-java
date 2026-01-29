@@ -1,6 +1,10 @@
 package gs.mclo.api;
 
 import gs.mclo.api.data.Metadata;
+import gs.mclo.api.reader.FileLogReader;
+import gs.mclo.api.reader.LogReader;
+import gs.mclo.api.reader.StringLogReader;
+import gs.mclo.api.response.Limits;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -59,8 +63,18 @@ public class Log {
      * @param logFile Path to the log file, which must have a file extension of '.log' or '.txt'. The file extension may be suffixed by both `.0` and `.gz`
      * @throws IOException If an exception occurs while reading the logFile
      */
-    public Log(Path logFile) throws IOException {
-        this(new LogReader(logFile));
+    public Log(Path logFile, Limits limits) throws IOException {
+        this(new FileLogReader(logFile, limits));
+    }
+
+    /**
+     * Create a new Log
+     *
+     * @param content The whole content of the log.
+     * @throws IOException If an exception occurs while reading the logFile
+     */
+    public Log(String content, Limits limits) throws IOException {
+        this(new StringLogReader(content, limits));
     }
 
     /**
@@ -70,16 +84,7 @@ public class Log {
      * @throws IOException If an exception occurs while reading the logFile
      */
     public Log(LogReader reader) throws IOException {
-        this(reader.readContents());
-    }
-
-    /**
-     * Create a new Log
-     *
-     * @param content The whole content of the log to share.
-     */
-    public Log(String content) {
-        this.content = content;
+        this.content = reader.readContents();
         this.filter();
     }
 
@@ -162,6 +167,7 @@ public class Log {
 
     /**
      * Get the name of the log source, e.g. a domain or software name.
+     *
      * @return Name of the log source or null.
      */
     public @Nullable String getSource() {
@@ -170,6 +176,7 @@ public class Log {
 
     /**
      * Set the name of the log source, e.g. a domain or software name.
+     *
      * @param source Name of the log source or null.
      * @return this Log instance.
      */
@@ -180,6 +187,7 @@ public class Log {
 
     /**
      * Get the metadata associated with the log.
+     *
      * @return Set of metadata.
      */
     public Set<Metadata<?>> getMetadata() {
@@ -188,6 +196,7 @@ public class Log {
 
     /**
      * Set the metadata associated with the log.
+     *
      * @param metadata Set of metadata.
      * @return this Log instance.
      */
@@ -198,6 +207,7 @@ public class Log {
 
     /**
      * Add a metadata entry to the log.
+     *
      * @param data Metadata entry to add.
      * @return this Log instance.
      */

@@ -1,6 +1,7 @@
 package gs.mclo.api;
 
 import gs.mclo.api.internal.LimitedReader;
+import gs.mclo.api.response.Limits;
 import org.junit.jupiter.api.Test;
 
 import java.io.StringReader;
@@ -12,7 +13,7 @@ public class LimitedReaderTest {
     void testReadSimpleString() {
         assertDoesNotThrow(() -> {
             String input = "Hello, world!";
-            try (LimitedReader reader = new LimitedReader(new StringReader(input), 100, 100)) {
+            try (LimitedReader reader = new LimitedReader(new StringReader(input), new Limits(1, 100, 100))) {
                 char[] buffer = new char[100];
 
                 int offset = 0;
@@ -42,7 +43,7 @@ public class LimitedReaderTest {
     void testReadByteLimit() {
         assertDoesNotThrow(() -> {
             String input = "Hello, world!";
-            try (LimitedReader reader = new LimitedReader(new StringReader(input), 10, 100)) {
+            try (LimitedReader reader = new LimitedReader(new StringReader(input), new Limits(1, 10, 100))) {
                 char[] buffer = new char[100];
 
                 int offset = 0;
@@ -72,7 +73,7 @@ public class LimitedReaderTest {
     void testReadByteLimitUnicode() {
         assertDoesNotThrow(() -> {
             String input = "Hello, world 🌍!";
-            try (LimitedReader reader = new LimitedReader(new StringReader(input), 17, 100)) {
+            try (LimitedReader reader = new LimitedReader(new StringReader(input), new Limits(1, 17, 100))) {
                 char[] buffer = new char[100];
 
                 int offset = 0;
@@ -102,7 +103,7 @@ public class LimitedReaderTest {
     void testReadByteLimitUnicodeCutoff() {
         assertDoesNotThrow(() -> {
             String input = "Hello, world 🌍";
-            try (LimitedReader reader = new LimitedReader(new StringReader(input), 14, 100)) {
+            try (LimitedReader reader = new LimitedReader(new StringReader(input), new Limits(1, 14, 100))) {
                 char[] buffer = new char[100];
 
                 int offset = 0;
@@ -132,7 +133,7 @@ public class LimitedReaderTest {
     void testReadLineLimit() {
         assertDoesNotThrow(() -> {
             String input = "H\ne\nl\nl\no, world!";
-            try (LimitedReader reader = new LimitedReader(new StringReader(input), 100, 3)) {
+            try (LimitedReader reader = new LimitedReader(new StringReader(input), new Limits(1, 100, 3))) {
                 char[] buffer = new char[100];
 
                 int offset = 0;

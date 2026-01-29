@@ -1,6 +1,6 @@
 package gs.mclo.api.internal;
 
-import gs.mclo.api.LogReader;
+import gs.mclo.api.reader.FileLogReader;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -23,7 +23,7 @@ public final class Util {
             files = new String[0];
 
         return Arrays.stream(files)
-                .filter(f -> f.matches(LogReader.ALLOWED_FILE_NAME_PATTERN.pattern()))
+                .filter(f -> f.matches(FileLogReader.ALLOWED_FILE_NAME_PATTERN.pattern()))
                 .sorted()
                 .toArray(String[]::new);
     }
