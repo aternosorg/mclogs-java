@@ -1,4 +1,4 @@
-package gs.mclo.api.util;
+package gs.mclo.api.internal;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;

@@ -1,9 +1,6 @@
 package gs.mclo.api.util;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.stream.Collectors;
@@ -25,19 +22,27 @@ public class TestUtil {
      * Get the contents of the file located at this path
      * @param path path to file
      * @return file content
-     * @throws IOException error reading file
+     * @throws UncheckedIOException error reading file
      */
-    public static String getFileContents(String path) throws IOException {
-        return inputStreamToString(Files.newInputStream(Paths.get(path)));
+    public static String getFileContents(String path) {
+        try {
+            return inputStreamToString(Files.newInputStream(Paths.get(path)));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     /**
      * Get the contents of the GZIP compressed file located at this path
      * @param path path to file
      * @return file content
-     * @throws IOException error reading file
+     * @throws UncheckedIOException error reading file
      */
-    public static String getGZIPFileContents(String path) throws IOException {
-        return inputStreamToString(new GZIPInputStream(Files.newInputStream(Paths.get(path))));
+    public static String getGZIPFileContents(String path) {
+        try {
+            return inputStreamToString(new GZIPInputStream(Files.newInputStream(Paths.get(path))));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 }

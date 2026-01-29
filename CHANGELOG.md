@@ -11,6 +11,9 @@
 - `LimitedReader` and `Util` are now internal
 - Removed deprecated constants and constructor from the `Log` class.
 
+## New Features
+- You can now specify a source and other metadata when uploading logs.
+
 ## Improvements
 
 - Remove exception that is never thrown from signature of `MclogsClient#analyseLog(Path)`

@@ -1,12 +1,15 @@
 package gs.mclo.api;
 
+import gs.mclo.api.data.Metadata;
+import gs.mclo.api.internal.request.UploadLogRequestBody;
 import gs.mclo.api.response.InsightsResponse;
 import gs.mclo.api.response.Limits;
 import gs.mclo.api.response.UploadLogResponse;
 import gs.mclo.api.util.TestUtil;
-import gs.mclo.api.util.Util;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
@@ -15,7 +18,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class APITest extends BaseApiTest {
+public class MclogsClientTest extends ApiTest {
     @Test
     void listLogs() {
         assertDoesNotThrow(() -> assertArrayEquals(
@@ -79,6 +82,23 @@ public class APITest extends BaseApiTest {
     }
 
     @Test
+    void shareLogWithMetadata() {
+        assertDoesNotThrow(() -> {
+            var request = new Log(Paths.get("src/test/resources/logs/one.log"));
+            request.setSource("mclogs-java-tests");
+            request.addMetadata(new Metadata<>("key-a", "value-a", "Label A", true));
+            CompletableFuture<UploadLogResponse> response = client.uploadLog(request);
+            UploadLogResponse res = response.get();
+            assertNotNull(res.getId());
+            assertNotNull(res.getUrl());
+            CompletableFuture<String> rawLog = res.getRawContent();
+            assertEquals(TestUtil.getFileContents("src/test/resources/logs/one.log"), rawLog.get());
+
+            System.out.println("Test log has been shared at " + res.getUrl());
+        });
+    }
+
+    @Test
     void shareGzipLog() {
         assertDoesNotThrow(() -> {
             CompletableFuture<UploadLogResponse> response = client.uploadLog(Paths.get("src/test/resources/logs/three.log.gz"));
@@ -122,22 +142,29 @@ public class APITest extends BaseApiTest {
 
     @Test
     void customInstance() {
-        assertDoesNotThrow(() -> {
-            Instance instance = new Instance("https://api.mclo.gs", "https://mclo.gs")
-                    .setApiBaseUrl("https://api.mclo.gs")
-                    .setViewLogUrl("https://mclo.gs");
+        String content = TestUtil.getFileContents("src/test/resources/logs/one.log");
 
-            MclogsClient client = new MclogsClient("aternos/mclogs-java-tests")
-                    .setInstance(instance);
-            CompletableFuture<UploadLogResponse> response = client.uploadLog(TestUtil.getFileContents("src/test/resources/logs/one.log"));
-            UploadLogResponse res = response.get();
-            assertNotNull(res.getId());
-            assertNotNull(res.getUrl());
-            CompletableFuture<String> rawLog = res.getRawContent();
-            assertEquals(TestUtil.getFileContents("src/test/resources/logs/one.log"), rawLog.get());
+        Instance instance = new Instance("https://api.mclo.gs", "https://mclo.gs")
+                .setApiBaseUrl("https://api.mclo.gs")
+                .setViewLogUrl("https://mclo.gs");
 
-            System.out.println("Test log has been shared at " + res.getUrl());
-        });
+        MclogsClient client = new MclogsClient("aternos/mclogs-java-tests")
+                .setInstance(instance);
+        client.uploadLog(content)
+                .thenAccept(res -> {
+                    assertNotNull(res.getId());
+                    assertNotNull(res.getUrl());
+                    res.getRawContent().thenAccept(raw -> assertEquals(content, raw))
+                            .exceptionally(t -> {
+                                fail(t);
+                                return null;
+                            });
+                    System.out.println("Test log has been shared at " + res.getUrl());
+                })
+                .exceptionally(t -> {
+                    fail(t);
+                    return null;
+                });
     }
 
     @Test

@@ -1,4 +1,4 @@
-package gs.mclo.api.util;
+package gs.mclo.api.internal;
 
 import com.google.gson.JsonElement;
 import gs.mclo.api.APIException;

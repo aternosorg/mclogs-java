@@ -1,4 +1,4 @@
-package gs.mclo.api.util;
+package gs.mclo.api.internal;
 
 import org.jetbrains.annotations.Nullable;
 

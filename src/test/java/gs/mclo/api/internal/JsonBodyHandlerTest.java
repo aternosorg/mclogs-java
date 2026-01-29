@@ -1,8 +1,8 @@
-package gs.mclo.api.util;
+package gs.mclo.api.internal;
 
 import com.google.gson.JsonParser;
 import gs.mclo.api.APIException;
-import gs.mclo.api.BaseApiTest;
+import gs.mclo.api.ApiTest;
 import gs.mclo.api.response.UploadLogResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -11,7 +11,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.concurrent.CompletionException;
 
-public class JsonBodyHandlerTest extends BaseApiTest {
+public class JsonBodyHandlerTest extends ApiTest {
 
     @ParameterizedTest
     @ValueSource(strings = {

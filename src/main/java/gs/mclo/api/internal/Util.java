@@ -1,4 +1,4 @@
-package gs.mclo.api.util;
+package gs.mclo.api.internal;
 
 import gs.mclo.api.LogReader;
 import org.jetbrains.annotations.ApiStatus;

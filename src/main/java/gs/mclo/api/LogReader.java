@@ -1,7 +1,7 @@
 package gs.mclo.api;
 
 import gs.mclo.api.response.Limits;
-import gs.mclo.api.util.LimitedReader;
+import gs.mclo.api.internal.LimitedReader;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;

@@ -1,7 +1,12 @@
 package gs.mclo.api;
 
+import gs.mclo.api.data.Metadata;
+import org.jetbrains.annotations.Nullable;
+
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -37,6 +42,16 @@ public class Log {
      * Log content
      */
     private String content;
+
+    /**
+     * Optional name of the log source, e.g. a domain or software name.
+     */
+    private @Nullable String source;
+
+    /**
+     * Optional metadata associated with the log.
+     */
+    private Set<Metadata<?>> metadata = new HashSet<>();
 
     /**
      * Create a new Log from a Path
@@ -143,5 +158,51 @@ public class Log {
      */
     public String getContent() {
         return content;
+    }
+
+    /**
+     * Get the name of the log source, e.g. a domain or software name.
+     * @return Name of the log source or null.
+     */
+    public @Nullable String getSource() {
+        return source;
+    }
+
+    /**
+     * Set the name of the log source, e.g. a domain or software name.
+     * @param source Name of the log source or null.
+     * @return this Log instance.
+     */
+    public Log setSource(@Nullable String source) {
+        this.source = source;
+        return this;
+    }
+
+    /**
+     * Get the metadata associated with the log.
+     * @return Set of metadata.
+     */
+    public Set<Metadata<?>> getMetadata() {
+        return metadata;
+    }
+
+    /**
+     * Set the metadata associated with the log.
+     * @param metadata Set of metadata.
+     * @return this Log instance.
+     */
+    public Log setMetadata(Set<Metadata<?>> metadata) {
+        this.metadata = metadata;
+        return this;
+    }
+
+    /**
+     * Add a metadata entry to the log.
+     * @param data Metadata entry to add.
+     * @return this Log instance.
+     */
+    public Log addMetadata(Metadata<?> data) {
+        this.metadata.add(data);
+        return this;
     }
 }

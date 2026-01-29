@@ -1,6 +1,6 @@
 package gs.mclo.api;
 
-import gs.mclo.api.util.LimitedReader;
+import gs.mclo.api.internal.LimitedReader;
 import org.junit.jupiter.api.Test;
 
 import java.io.StringReader;

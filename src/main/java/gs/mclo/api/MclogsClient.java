@@ -1,9 +1,10 @@
 package gs.mclo.api;
 
 import com.google.gson.Gson;
+import gs.mclo.api.internal.request.UploadLogRequestBody;
 import gs.mclo.api.response.*;
-import gs.mclo.api.util.JsonBodyHandler;
-import gs.mclo.api.util.Util;
+import gs.mclo.api.internal.JsonBodyHandler;
+import gs.mclo.api.internal.Util;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -161,14 +162,58 @@ public class MclogsClient {
     }
 
     /**
+     * Upload a log to mclogs with metadata and a source.
+     *
+     * @param body the log to upload with optional parameters
+     * @return the response
+     */
+    public CompletableFuture<UploadLogResponse> uploadLog(UploadLogRequestBody body) {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(instance.getLogUploadUrl()))
+                .header("Content-Type", "application/json")
+                .header("Accept", "application/json")
+                .header("User-Agent", this.getUserAgent())
+                .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(body)))
+                .build();
+        return asyncRequest(request, UploadLogResponse.class);
+        // TODO: Catch unsupported media type and retry with form data?
+        // TODO: Somehow make limits pass along in more cases
+    }
+
+    /**
      * Upload a log to mclogs
      *
      * @param log the log to upload
      * @return the response
      */
     public CompletableFuture<UploadLogResponse> uploadLog(Log log) {
-        HttpRequest request = this.uploadRequest(instance.getLogUploadUrl(), log);
-        return asyncRequest(request, UploadLogResponse.class);
+        // Try new upload method
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(instance.getLogUploadUrl()))
+                .header("Content-Type", "application/json")
+                .header("Accept", "application/json")
+                .header("User-Agent", this.getUserAgent())
+                .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(new UploadLogRequestBody(log.getContent(), log.getSource(), log.getMetadata()))))
+                .build();
+
+        return asyncRequest(request, UploadLogResponse.class).handle((response, throwable) -> {
+            // No idea why IntelliJ is complaining about this being always true. response is clearly nullable here.
+            //noinspection ConstantValue
+            if (response != null) {
+                return CompletableFuture.completedFuture(response);
+            }
+
+
+            if (throwable != null && throwable.getCause() instanceof APIException) {
+                APIException apiException = (APIException) throwable.getCause();
+                if (apiException.getMessage().contains("Required POST argument 'content' not found")) {
+                    // Fallback to old upload method
+                    HttpRequest fallbackRequest = this.uploadRequest(instance.getLogUploadUrl(), log);
+                    return asyncRequest(fallbackRequest, UploadLogResponse.class);
+                }
+            }
+            throw new CompletionException(throwable);
+        }).thenCompose(x -> x);
     }
 
     /**
