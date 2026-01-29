@@ -72,7 +72,6 @@ public class JsonBodyHandlerTest extends ApiTest {
 
     @Test
     public void testNotJsonObject() {
-
         var handler = new JsonBodyHandler<>(client, UploadLogResponse.class);
         var json = JsonParser.parseString("1");
 

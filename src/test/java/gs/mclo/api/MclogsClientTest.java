@@ -1,10 +1,6 @@
 package gs.mclo.api;
 
 import gs.mclo.api.data.Metadata;
-import gs.mclo.api.internal.request.UploadLogRequestBody;
-import gs.mclo.api.response.InsightsResponse;
-import gs.mclo.api.response.Limits;
-import gs.mclo.api.response.UploadLogResponse;
 import gs.mclo.api.util.TestUtil;
 import org.junit.jupiter.api.Test;
 
@@ -13,7 +9,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -21,101 +17,103 @@ import static org.junit.jupiter.api.Assertions.*;
 public class MclogsClientTest extends ApiTest {
     @Test
     void listLogs() {
-        assertDoesNotThrow(() -> assertArrayEquals(
+        assertArrayEquals(
                 Stream.of("one.log", "three.log.gz", "two.log").sorted().toArray(String[]::new),
                 Arrays.stream(client.listLogsInDirectory("src/test/resources")).sorted().toArray(String[]::new)
-        ));
+        );
     }
 
     @Test
     void listLogsNoDir() {
-        assertDoesNotThrow(() -> assertArrayEquals(
+        assertArrayEquals(
                 new String[0],
                 Arrays.stream(client.listLogsInDirectory("src/test/resources/directory")).sorted().toArray(String[]::new)
-        ));
+        );
     }
 
     @Test
     void listLogsEmptyDir() {
-        assertDoesNotThrow(() -> assertArrayEquals(
+        assertArrayEquals(
                 new String[0],
                 Arrays.stream(client.listLogsInDirectory("src/test/resources/empty")).sorted().toArray(String[]::new)
-        ));
+        );
     }
 
     @Test
     void listCrashReports() {
-        assertDoesNotThrow(() -> assertArrayEquals(
+        assertArrayEquals(
                 Stream.of("eight.txt", "seven.log.gz", "five.log").sorted().toArray(String[]::new),
                 Arrays.stream(client.listCrashReportsInDirectory("src/test/resources")).sorted().toArray(String[]::new)
-        ));
+        );
     }
 
     @Test
     void listCrashReportsNoDir() {
-        assertDoesNotThrow(() -> assertArrayEquals(
+        assertArrayEquals(
                 new String[0],
                 Arrays.stream(client.listCrashReportsInDirectory("src/test/resources/dir")).sorted().toArray(String[]::new)
-        ));
+        );
     }
 
     @Test
     void listCrashReportsEmptyDir() {
-        assertDoesNotThrow(() -> assertArrayEquals(
+        assertArrayEquals(
                 new String[0],
                 Arrays.stream(client.listCrashReportsInDirectory("src/test/resources/empty")).sorted().toArray(String[]::new)
-        ));
+        );
     }
 
     @Test
     void shareLog() {
-        assertDoesNotThrow(() -> {
-            CompletableFuture<UploadLogResponse> response = client.uploadLog(Paths.get("src/test/resources/logs/one.log"));
-            UploadLogResponse res = response.get();
-            assertNotNull(res.getId());
-            assertNotNull(res.getUrl());
-            CompletableFuture<String> rawLog = res.getRawContent();
-            assertEquals(TestUtil.getFileContents("src/test/resources/logs/one.log"), rawLog.get());
-
-            System.out.println("Test log has been shared at " + res.getUrl());
-        });
+        client.uploadLog(Paths.get("src/test/resources/logs/one.log"))
+                .thenCompose(res -> {
+                    assertNotNull(res.getId());
+                    assertNotNull(res.getUrl());
+                    return res.getRawContent()
+                        .thenAccept(content -> assertEquals(TestUtil.getFileContents("src/test/resources/logs/one.log"), content));
+                })
+                .orTimeout(10, TimeUnit.SECONDS)
+                .join();
     }
 
     @Test
     void shareLogWithMetadata() {
-        assertDoesNotThrow(() -> {
-            var request = new Log(Paths.get("src/test/resources/logs/one.log"));
-            request.setSource("mclogs-java-tests");
-            request.addMetadata(new Metadata<>("key-a", "value-a", "Label A", true));
-            CompletableFuture<UploadLogResponse> response = client.uploadLog(request);
-            UploadLogResponse res = response.get();
-            assertNotNull(res.getId());
-            assertNotNull(res.getUrl());
-            CompletableFuture<String> rawLog = res.getRawContent();
-            assertEquals(TestUtil.getFileContents("src/test/resources/logs/one.log"), rawLog.get());
-
-            System.out.println("Test log has been shared at " + res.getUrl());
-        });
+        Log request;
+        try {
+            request = new Log(Paths.get("src/test/resources/logs/one.log"));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+        request.setSource("mclogs-java-tests");
+        request.addMetadata(new Metadata<>("key-a", "value-a", "Label A", true));
+        client.uploadLog(request)
+                .thenCompose(res -> {
+                    assertNotNull(res.getId());
+                    assertNotNull(res.getUrl());
+                    return res.getRawContent()
+                        .thenAccept(content -> assertEquals(TestUtil.getFileContents("src/test/resources/logs/one.log"), content));
+                })
+                .orTimeout(10, TimeUnit.SECONDS)
+                .join();
     }
 
     @Test
     void shareGzipLog() {
-        assertDoesNotThrow(() -> {
-            CompletableFuture<UploadLogResponse> response = client.uploadLog(Paths.get("src/test/resources/logs/three.log.gz"));
-            UploadLogResponse res = response.get();
-            assertNotNull(res.getId());
-            assertNotNull(res.getUrl());
-            CompletableFuture<String> rawLog = res.getRawContent();
-            assertEquals(TestUtil.getGZIPFileContents("src/test/resources/logs/three.log.gz"), rawLog.get());
-
-            System.out.println("Gzip test log has been shared at " + res.getUrl());
-        });
+        client.uploadLog(Paths.get("src/test/resources/logs/three.log.gz"))
+                .thenCompose(res -> {
+                    assertNotNull(res.getId());
+                    assertNotNull(res.getUrl());
+                    return res.getRawContent()
+                        .thenAccept(content -> assertEquals(TestUtil.getGZIPFileContents("src/test/resources/logs/three.log.gz"), content));
+                })
+                .orTimeout(10, TimeUnit.SECONDS)
+                .join();
     }
 
     @Test
     void shareSecretFile() {
         CompletableFuture<?> future = client.uploadLog(Paths.get("src/test/resources/logs/secret.secret"));
-        assertThrows(ExecutionException.class, future::get);
+        assertThrows(Exception.class, future::join);
     }
 
     @Test
@@ -151,59 +149,56 @@ public class MclogsClientTest extends ApiTest {
         MclogsClient client = new MclogsClient("aternos/mclogs-java-tests")
                 .setInstance(instance);
         client.uploadLog(content)
-                .thenAccept(res -> {
+                .thenCompose(res -> {
                     assertNotNull(res.getId());
                     assertNotNull(res.getUrl());
-                    res.getRawContent().thenAccept(raw -> assertEquals(content, raw))
-                            .exceptionally(t -> {
-                                fail(t);
-                                return null;
-                            });
                     System.out.println("Test log has been shared at " + res.getUrl());
+                    return res.getRawContent().thenAccept(raw -> assertEquals(content, raw));
                 })
-                .exceptionally(t -> {
-                    fail(t);
-                    return null;
-                });
+                .orTimeout(10, TimeUnit.SECONDS)
+                .join();
     }
 
     @Test
     void getLogInsights() {
-        assertDoesNotThrow(() -> {
-            CompletableFuture<UploadLogResponse> response = client.uploadLog(Paths.get("src/test/resources/logs/three.log.gz"));
-            UploadLogResponse res = response.get();
-            assertNotNull(res.getId());
-            assertNotNull(res.getUrl());
-            CompletableFuture<InsightsResponse> insightsResponse = res.getInsights();
-            InsightsResponse insights = insightsResponse.get();
-            assertNotNull(insights);
-            assertNotNull(insights.getAnalysis());
-            assertNotNull(insights.getAnalysis().getInformation());
-            assertNotNull(insights.getAnalysis().getProblems());
-        });
+        client.uploadLog(Paths.get("src/test/resources/logs/three.log.gz"))
+                .thenCompose(res -> {
+                    assertNotNull(res.getId());
+                    assertNotNull(res.getUrl());
+                    return res.getInsights();
+                }).thenAccept(insights -> {
+                    assertNotNull(insights);
+                    assertNotNull(insights.getAnalysis());
+                    assertNotNull(insights.getAnalysis().getInformation());
+                    assertNotNull(insights.getAnalysis().getProblems());
+                })
+                .orTimeout(10, TimeUnit.SECONDS)
+                .join();
     }
 
     @Test
     void analyseLog() {
-        assertDoesNotThrow(() -> {
-            CompletableFuture<InsightsResponse> insightsResponse = client.analyseLog(Paths.get("src/test/resources/logs/three.log.gz"));
-            InsightsResponse insights = insightsResponse.get();
-            assertNotNull(insights);
-            assertNotNull(insights.getAnalysis());
-            assertNotNull(insights.getAnalysis().getInformation());
-            assertNotNull(insights.getAnalysis().getProblems());
-        });
+        client.analyseLog(Paths.get("src/test/resources/logs/three.log.gz"))
+                .thenAccept(insights -> {
+                    assertNotNull(insights);
+                    assertNotNull(insights.getAnalysis());
+                    assertNotNull(insights.getAnalysis().getInformation());
+                    assertNotNull(insights.getAnalysis().getProblems());
+                })
+                .orTimeout(10, TimeUnit.SECONDS)
+                .join();
     }
 
     @Test
     void getStorageLimits() {
-        assertDoesNotThrow(() -> {
-            CompletableFuture<Limits> limitsResponse = client.getLimits();
-            Limits limits = limitsResponse.get();
-            assertNotNull(limits);
-            assertTrue(limits.getStorageTime() > 0);
-            assertTrue(limits.getMaxLength() > 0);
-            assertTrue(limits.getMaxLines() > 0);
-        });
+        client.getLimits()
+                .thenAccept(limits -> {
+                    assertNotNull(limits);
+                    assertTrue(limits.getStorageTime() > 0);
+                    assertTrue(limits.getMaxLength() > 0);
+                    assertTrue(limits.getMaxLines() > 0);
+                })
+                .orTimeout(10, TimeUnit.SECONDS)
+                .join();
     }
 }
