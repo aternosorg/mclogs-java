@@ -94,4 +94,8 @@ public final class RequestBuilder {
                 .POST(HttpRequest.BodyPublishers.ofString("content=" + URLEncoder.encode(log.getContent(), StandardCharsets.UTF_8)))
                 .build();
     }
+
+    public @Nullable String getProjectName() {
+        return projectName;
+    }
 }

@@ -14,7 +14,8 @@
 - Removed deprecated constants and constructor from the `Log` class.
 
 ## New Features
-- You can now specify a source and other metadata when uploading logs.
+- You can now specify a source and other metadata when uploading logs. By default, this is filled with the project name
+  you can set with `MclogsClient#setProjectName(String)`
 - You can delete logs after uploading them using `UploadLogResponse#delete()` or `MclogsClient#deleteLog(id, token)`
   with the token from the upload response.
 - Uploading a log now returns many new fields

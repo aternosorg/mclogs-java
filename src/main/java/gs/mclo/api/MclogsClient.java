@@ -145,6 +145,10 @@ public class MclogsClient {
      * @return the response
      */
     public CompletableFuture<UploadLogResponse> uploadLog(Log log) {
+        if (log.getSource() == null) {
+            log.setSource(requestBuilder.getProjectName());
+        }
+
         // Try new upload method
         HttpRequest request = requestBuilder.request(instance.getLogUploadUrl())
                 .header("Content-Type", "application/json")
