@@ -9,6 +9,7 @@
   - Remove the `success` and `error` fields from response objects.
 - Many classes have been marked as final or not-extendable.
 - `LimitedReader` and `Util` are now internal
+- Removed deprecated constants and constructor from the `Log` class.
 
 ## Improvements
 

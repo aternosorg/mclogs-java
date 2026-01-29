@@ -1,10 +1,7 @@
 package gs.mclo.api;
 
-import gs.mclo.api.response.Limits;
-
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,26 +32,6 @@ public class Log {
     public static final Pattern[] IPV6_FILTER = new Pattern[]{
             Pattern.compile("[0:]+1?"),
     };
-
-    /**
-     * Only allow logs with the file extension `.log` or `.txt` which may be suffixed by:
-     * <ul>
-     *     <li> up to two dots with numbers as used by BungeeCord
-     *     <li> `.gz` for gzip compressed files
-     * </ul>
-     *
-     * @deprecated Use {@link LogReader#ALLOWED_FILE_NAME_PATTERN} instead
-     */
-    @Deprecated(since = "4.2", forRemoval = true)
-    public static final Pattern ALLOWED_FILE_NAME_PATTERN = LogReader.ALLOWED_FILE_NAME_PATTERN;
-
-    /**
-     * Maximum length of log files that can be uploaded in bytes
-     *
-     * @deprecated Since these limits configurable use {@link MclogsClient#getLimits()} to fetch them
-     */
-    @Deprecated(since = "4.2", forRemoval = true)
-    public static final int MAX_LOG_LENGTH = Limits.DEFAULT.getMaxLength();
 
     /**
      * Log content
@@ -89,19 +66,6 @@ public class Log {
     public Log(String content) {
         this.content = content;
         this.filter();
-    }
-
-    /**
-     * Create a new Log
-     *
-     * @param dir  The parent directory of the log file
-     * @param file The log file, which must have a file extension of '.log' or '.txt'. The file extension may be suffixed by both `.0` and `.gz`
-     * @throws IOException If an exception occurs while reading the logFile
-     * @deprecated Use {@link Log#Log(Path)} instead
-     */
-    @Deprecated
-    public Log(String dir, String file) throws IOException {
-        this(Paths.get(dir).resolve(file));
     }
 
     /**
