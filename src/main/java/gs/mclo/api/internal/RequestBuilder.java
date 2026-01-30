@@ -88,11 +88,16 @@ public final class RequestBuilder {
                 .header("User-Agent", this.getUserAgent());
     }
 
-    public HttpRequest legacyUpload(String url, Log log) throws IOException {
+    public HttpRequest.Builder uploadRequest(String url, String body) throws IOException {
         return request(url)
-                .header("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+                .header("Content-Encoding", "gzip")
                 .header("Accept", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString("content=" + URLEncoder.encode(log.getContent(), StandardCharsets.UTF_8)))
+                .POST(CustomBodyPublishers.ofGzipString(body));
+    }
+
+    public HttpRequest legacyUpload(String url, Log log) throws IOException {
+        return uploadRequest(url, "content=" + URLEncoder.encode(log.getContent(), StandardCharsets.UTF_8))
+                .header("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
                 .build();
     }
 

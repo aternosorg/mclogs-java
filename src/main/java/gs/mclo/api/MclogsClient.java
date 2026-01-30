@@ -153,10 +153,9 @@ public class MclogsClient {
         // Try new upload method
         HttpRequest request;
         try {
-            request = requestBuilder.request(instance.getLogUploadUrl())
+            var body = gson.toJson(new UploadLogRequestBody(log.getContent(), log.getSource(), log.getMetadata()));
+            request = requestBuilder.uploadRequest(instance.getLogUploadUrl(), body)
                     .header("Content-Type", "application/json")
-                    .header("Accept", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(new UploadLogRequestBody(log.getContent(), log.getSource(), log.getMetadata()))))
                     .build();
         } catch (IOException e) {
             return CompletableFuture.failedFuture(e);
@@ -241,7 +240,7 @@ public class MclogsClient {
      * @return the insights of the log
      */
     public CompletableFuture<InsightsResponse> analyseLog(Log log) {
-        HttpRequest request = null;
+        HttpRequest request;
         try {
             request = requestBuilder.legacyUpload(instance.getLogAnalysisUrl(), log);
         } catch (IOException e) {

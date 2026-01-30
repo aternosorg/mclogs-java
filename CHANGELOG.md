@@ -20,6 +20,7 @@
   with the token from the upload response.
 - Uploading a log now returns many new fields
 - These new fields, the raw content, the parsed log entries and insights can now be fetched with a single request.
+- Uploaded logs are now automatically compressed with GZIP during transfer
 
 ## Improvements
 
