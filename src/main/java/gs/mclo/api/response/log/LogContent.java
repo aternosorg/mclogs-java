@@ -2,7 +2,6 @@ package gs.mclo.api.response.log;
 
 import gs.mclo.api.response.InsightsResponse;
 import gs.mclo.api.response.entry.Entry;
-import gs.mclo.api.response.insights.Analysis;
 import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("unused")

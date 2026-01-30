@@ -13,7 +13,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
-@SuppressWarnings({"unused", "NotNullFieldNotInitialized", "FieldMayBeFinal"})
+@SuppressWarnings({"unused", "NotNullFieldNotInitialized", "FieldMayBeFinal", "MismatchedQueryAndUpdateOfCollection"})
 @ApiStatus.NonExtendable
 public class CommonLogResponse implements Initializable {
     private transient @Nullable MclogsClient client;

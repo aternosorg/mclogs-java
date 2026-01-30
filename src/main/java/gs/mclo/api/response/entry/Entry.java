@@ -2,7 +2,7 @@ package gs.mclo.api.response.entry;
 
 import org.jetbrains.annotations.Nullable;
 
-@SuppressWarnings({"unused"})
+@SuppressWarnings({"unused", "NotNullFieldNotInitialized"})
 public final class Entry {
     /**
      * The level of the entry.

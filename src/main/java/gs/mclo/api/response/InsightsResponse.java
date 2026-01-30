@@ -2,7 +2,7 @@ package gs.mclo.api.response;
 
 import gs.mclo.api.response.insights.Analysis;
 
-@SuppressWarnings({"FieldMayBeFinal", "unused", "NotNullFieldNotInitialized"})
+@SuppressWarnings({"unused", "NotNullFieldNotInitialized"})
 public final class InsightsResponse {
 
     /**

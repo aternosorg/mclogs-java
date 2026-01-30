@@ -5,8 +5,10 @@ plugins {
     alias(libs.plugins.jreleaser)
 }
 
-sourceCompatibility = 11
-targetCompatibility = 11
+java {
+    sourceCompatibility = 11
+    targetCompatibility = 11
+}
 
 group = 'gs.mclo'
 version = project.findProperty("release") ?: "dev"

@@ -6,11 +6,12 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 
+@SuppressWarnings({"FieldCanBeLocal", "unused"})
 @ApiStatus.Internal
 public final class UploadLogRequestBody {
     private final String content;
-    private @Nullable String source;
-    private Set<Metadata<?>> metadata;
+    private final @Nullable String source;
+    private final Set<Metadata<?>> metadata;
 
     public UploadLogRequestBody(String content, @Nullable String source, Set<Metadata<?>> metadata) {
         this.content = content;
