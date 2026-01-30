@@ -3,6 +3,7 @@ package gs.mclo.api.internal;
 import gs.mclo.api.Log;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpRequest;
@@ -87,7 +88,7 @@ public final class RequestBuilder {
                 .header("User-Agent", this.getUserAgent());
     }
 
-    public HttpRequest legacyUpload(String url, Log log) {
+    public HttpRequest legacyUpload(String url, Log log) throws IOException {
         return request(url)
                 .header("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
                 .header("Accept", "application/json")

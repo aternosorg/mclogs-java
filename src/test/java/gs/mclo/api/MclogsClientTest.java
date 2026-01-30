@@ -86,11 +86,7 @@ public class MclogsClientTest extends ApiTest {
     @Test
     void shareLogWithMetadata() {
         Log request;
-        try {
-            request = new Log(new FileLogReader(Paths.get("src/test/resources/logs/one.log"), Limits.DEFAULT));
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        request = new Log(new FileLogReader(Paths.get("src/test/resources/logs/one.log"), Limits.DEFAULT));
         request.setSource("mclogs-java-tests");
         request.addMetadata(new Metadata<>("key-a", "value-a", "Label A", true));
         client.uploadLog(request)

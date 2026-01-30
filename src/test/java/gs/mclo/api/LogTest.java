@@ -6,9 +6,9 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 
 public class LogTest {
-    protected Log create(String content) {
+    protected String create(String content) {
         try {
-            return new Log(content, Limits.DEFAULT);
+            return new Log(content, Limits.DEFAULT).getContent();
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

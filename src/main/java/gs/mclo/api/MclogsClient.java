@@ -9,6 +9,7 @@ import gs.mclo.api.internal.Util;
 import gs.mclo.api.internal.gson.InstantTypeAdapter;
 import gs.mclo.api.internal.request.UploadLogRequestBody;
 import gs.mclo.api.reader.FileLogReader;
+import gs.mclo.api.reader.LogReader;
 import gs.mclo.api.reader.StringLogReader;
 import gs.mclo.api.response.GetLogResponse;
 import gs.mclo.api.response.InsightsResponse;
@@ -18,7 +19,6 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -27,6 +27,7 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.function.BiFunction;
 
 public class MclogsClient {
     private final Gson gson = new GsonBuilder()
@@ -150,11 +151,16 @@ public class MclogsClient {
         }
 
         // Try new upload method
-        HttpRequest request = requestBuilder.request(instance.getLogUploadUrl())
-                .header("Content-Type", "application/json")
-                .header("Accept", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(new UploadLogRequestBody(log.getContent(), log.getSource(), log.getMetadata()))))
-                .build();
+        HttpRequest request;
+        try {
+            request = requestBuilder.request(instance.getLogUploadUrl())
+                    .header("Content-Type", "application/json")
+                    .header("Accept", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(new UploadLogRequestBody(log.getContent(), log.getSource(), log.getMetadata()))))
+                    .build();
+        } catch (IOException e) {
+            return CompletableFuture.failedFuture(e);
+        }
 
         return asyncRequest(request, UploadLogResponse.class).handle((response, throwable) -> {
             // No idea why IntelliJ is complaining about this being always true. response is clearly nullable here.
@@ -168,7 +174,12 @@ public class MclogsClient {
                 APIException apiException = (APIException) throwable.getCause();
                 if (apiException.getMessage().contains("Required POST argument 'content' not found")) {
                     // Fallback to old upload method
-                    HttpRequest fallbackRequest = requestBuilder.legacyUpload(instance.getLogUploadUrl(), log);
+                    HttpRequest fallbackRequest = null;
+                    try {
+                        fallbackRequest = requestBuilder.legacyUpload(instance.getLogUploadUrl(), log);
+                    } catch (IOException e) {
+                        throw new CompletionException(e);
+                    }
                     return asyncRequest(fallbackRequest, UploadLogResponse.class);
                 }
             }
@@ -183,7 +194,7 @@ public class MclogsClient {
      * @return the response
      */
     public CompletableFuture<UploadLogResponse> uploadLog(String log) {
-        return this.getLog(log).thenCompose(this::uploadLog);
+        return this.getLog(log, StringLogReader::new).thenCompose(this::uploadLog);
     }
 
     /**
@@ -193,7 +204,7 @@ public class MclogsClient {
      * @return the response
      */
     public CompletableFuture<UploadLogResponse> uploadLog(Path log) {
-        return this.getLog(log).thenCompose(this::uploadLog);
+        return this.getLog(log, FileLogReader::new).thenCompose(this::uploadLog);
     }
 
     /**
@@ -230,7 +241,12 @@ public class MclogsClient {
      * @return the insights of the log
      */
     public CompletableFuture<InsightsResponse> analyseLog(Log log) {
-        HttpRequest request = requestBuilder.legacyUpload(instance.getLogAnalysisUrl(), log);
+        HttpRequest request = null;
+        try {
+            request = requestBuilder.legacyUpload(instance.getLogAnalysisUrl(), log);
+        } catch (IOException e) {
+            return CompletableFuture.failedFuture(e);
+        }
         return asyncRequest(request, InsightsResponse.class);
     }
 
@@ -241,7 +257,7 @@ public class MclogsClient {
      * @return the insights of the log
      */
     public CompletableFuture<InsightsResponse> analyseLog(String log) {
-        return this.getLog(log).thenCompose(this::analyseLog);
+        return this.getLog(log, StringLogReader::new).thenCompose(this::analyseLog);
     }
 
     /**
@@ -251,7 +267,7 @@ public class MclogsClient {
      * @return the insights of the log
      */
     public CompletableFuture<InsightsResponse> analyseLog(Path log) {
-        return this.getLog(log).thenCompose(this::analyseLog);
+        return this.getLog(log, FileLogReader::new).thenCompose(this::analyseLog);
     }
 
     /**
@@ -352,24 +368,8 @@ public class MclogsClient {
         return this.getLimits().exceptionally(t -> Limits.DEFAULT);
     }
 
-    private CompletableFuture<Log> getLog(Path log) {
-        return this.getLimitsOrDefault().thenApply(limits -> {
-            try {
-                return new Log(new FileLogReader(log, limits));
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
-        });
-    }
-
-    private CompletableFuture<Log> getLog(String log) {
-        return this.getLimitsOrDefault().thenApply(limits -> {
-            try {
-                return new Log(new StringLogReader(log, limits));
-            } catch (IOException e) {
-                throw new CompletionException(e);
-            }
-        });
+    private <T> CompletableFuture<Log> getLog(T log, BiFunction<T, Limits, LogReader> constructor) {
+        return this.getLimitsOrDefault().thenApply(limits -> new Log(constructor.apply(log, limits)));
     }
 
     @ApiStatus.Internal

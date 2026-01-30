@@ -42,10 +42,12 @@ public class Log {
             Pattern.compile("[0:]+1?"),
     };
 
+    private final LogReader reader;
+
     /**
      * Log content
      */
-    private String content;
+    private @Nullable String content;
 
     /**
      * Optional name of the log source, e.g. a domain or software name.
@@ -61,9 +63,8 @@ public class Log {
      * Create a new Log from a Path
      *
      * @param logFile Path to the log file, which must have a file extension of '.log' or '.txt'. The file extension may be suffixed by both `.0` and `.gz`
-     * @throws IOException If an exception occurs while reading the logFile
      */
-    public Log(Path logFile, Limits limits) throws IOException {
+    public Log(Path logFile, Limits limits) {
         this(new FileLogReader(logFile, limits));
     }
 
@@ -71,9 +72,8 @@ public class Log {
      * Create a new Log
      *
      * @param content The whole content of the log.
-     * @throws IOException If an exception occurs while reading the logFile
      */
-    public Log(String content, Limits limits) throws IOException {
+    public Log(String content, Limits limits) {
         this(new StringLogReader(content, limits));
     }
 
@@ -81,26 +81,24 @@ public class Log {
      * Create a new Log from a log reader
      *
      * @param reader The log reader to read the log from
-     * @throws IOException If an exception occurs while reading the logFile
      */
-    public Log(LogReader reader) throws IOException {
-        this.content = reader.readContents();
-        this.filter();
+    public Log(LogReader reader) {
+        this.reader = reader;
     }
 
     /**
      * remove IP addresses
      */
-    private void filter() {
-        this.filterIPv4();
-        this.filterIPv6();
+    private String filter(String content) {
+        content = this.filterIPv4(content);
+        return this.filterIPv6(content);
     }
 
     /**
      * remove IPv4 addresses
      */
-    private void filterIPv4() {
-        Matcher matcher = IPV4_PATTERN.matcher(this.content);
+    private String filterIPv4(String content) {
+        Matcher matcher = IPV4_PATTERN.matcher(content);
         StringBuilder sb = new StringBuilder();
         while (matcher.find()) {
             if (isWhitelistedIPv4(matcher.group())) {
@@ -109,7 +107,7 @@ public class Log {
             matcher.appendReplacement(sb, "**.**.**.**");
         }
         matcher.appendTail(sb);
-        this.content = sb.toString();
+        return sb.toString();
     }
 
     /**
@@ -130,8 +128,8 @@ public class Log {
     /**
      * remove IPv6 addresses
      */
-    private void filterIPv6() {
-        Matcher matcher = IPV6_PATTERN.matcher(this.content);
+    private String filterIPv6(String content) {
+        Matcher matcher = IPV6_PATTERN.matcher(content);
         StringBuilder sb = new StringBuilder();
         while (matcher.find()) {
             if (isWhitelistedIPv6(matcher.group())) {
@@ -140,7 +138,7 @@ public class Log {
             matcher.appendReplacement(sb, "****:****:****:****:****:****:****:****");
         }
         matcher.appendTail(sb);
-        this.content = sb.toString();
+        return sb.toString();
     }
 
     /**
@@ -161,7 +159,12 @@ public class Log {
     /**
      * @return log content
      */
-    public String getContent() {
+    public String getContent() throws IOException {
+        if (content != null) {
+            return content;
+        }
+
+        this.content = this.filter(reader.readContents());
         return content;
     }
 
