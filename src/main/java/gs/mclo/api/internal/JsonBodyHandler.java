@@ -3,6 +3,7 @@ package gs.mclo.api.internal;
 import com.google.gson.JsonElement;
 import gs.mclo.api.APIException;
 import gs.mclo.api.MclogsClient;
+import org.jetbrains.annotations.Nullable;
 
 import java.net.http.HttpResponse;
 import java.util.concurrent.CompletionException;
@@ -17,16 +18,20 @@ public final class JsonBodyHandler<T> implements HttpResponse.BodyHandler<T> {
     }
 
     @Override
-    public HttpResponse.BodySubscriber<T> apply(HttpResponse.ResponseInfo responseInfo) {
+    public HttpResponse.BodySubscriber<@Nullable T> apply(HttpResponse.ResponseInfo responseInfo) {
         return HttpResponse.BodySubscribers.mapping(new JsonElementBodySubscriber(client.gson()), x -> map(x, responseInfo));
     }
 
-    T map(JsonElement element, HttpResponse.ResponseInfo responseInfo) {
+    @Nullable T map(JsonElement element, HttpResponse.ResponseInfo responseInfo) {
         if (!element.isJsonObject()) {
             throw new CompletionException(new APIException("Invalid API response (Status code: " + responseInfo.statusCode() + ")", responseInfo.statusCode()));
         }
 
         checkError(element, responseInfo);
+
+        if (clazz == Void.class) {
+            return null;
+        }
 
         var body = client.gson().fromJson(element, clazz);
 
