@@ -9,9 +9,29 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.net.http.HttpClient;
+import java.net.http.HttpHeaders;
+import java.net.http.HttpResponse;
+import java.util.Map;
 import java.util.concurrent.CompletionException;
 
 public class JsonBodyHandlerTest extends ApiTest {
+    private final HttpResponse.ResponseInfo responseInfo = new HttpResponse.ResponseInfo() {
+        @Override
+        public int statusCode() {
+            return 200;
+        }
+
+        @Override
+        public HttpHeaders headers() {
+            return HttpHeaders.of(Map.of(), (s1, s2) -> true);
+        }
+
+        @Override
+        public HttpClient.Version version() {
+            return HttpClient.Version.HTTP_1_1;
+        }
+    };
 
     @ParameterizedTest
     @ValueSource(strings = {
@@ -25,7 +45,7 @@ public class JsonBodyHandlerTest extends ApiTest {
 
         APIException exception = null;
         try {
-            handler.map(json);
+            handler.map(json, responseInfo);
         } catch (CompletionException e) {
             assert e.getCause() != null;
             assert e.getCause() instanceof APIException;
@@ -46,7 +66,7 @@ public class JsonBodyHandlerTest extends ApiTest {
 
         APIException exception = null;
         try {
-            handler.map(json);
+            handler.map(json, responseInfo);
         } catch (CompletionException e) {
             assert e.getCause() != null;
             assert e.getCause() instanceof APIException;
@@ -67,7 +87,7 @@ public class JsonBodyHandlerTest extends ApiTest {
     public void testSuccess(String body) {
         var handler = new JsonBodyHandler<>(client, UploadLogResponse.class);
         var json = JsonParser.parseString(body);
-        handler.map(json);
+        handler.map(json, responseInfo);
     }
 
     @Test
@@ -77,13 +97,14 @@ public class JsonBodyHandlerTest extends ApiTest {
 
         APIException exception = null;
         try {
-            handler.map(json);
+            handler.map(json, responseInfo);
         } catch (CompletionException e) {
             assert e.getCause() != null;
             assert e.getCause() instanceof APIException;
             exception = (APIException) e.getCause();
         }
         Assertions.assertNotNull(exception);
-        Assertions.assertEquals("Invalid API response", exception.getMessage());
+        Assertions.assertEquals("Invalid API response (Status code: 200)", exception.getMessage());
+        Assertions.assertEquals(200, exception.getHttpStatusCode());
     }
 }

@@ -18,15 +18,15 @@ public final class JsonBodyHandler<T> implements HttpResponse.BodyHandler<T> {
 
     @Override
     public HttpResponse.BodySubscriber<T> apply(HttpResponse.ResponseInfo responseInfo) {
-        return HttpResponse.BodySubscribers.mapping(new JsonElementBodySubscriber(client.gson()), this::map);
+        return HttpResponse.BodySubscribers.mapping(new JsonElementBodySubscriber(client.gson()), x -> map(x, responseInfo));
     }
 
-    T map(JsonElement element) {
+    T map(JsonElement element, HttpResponse.ResponseInfo responseInfo) {
         if (!element.isJsonObject()) {
-            throw new CompletionException(new APIException("Invalid API response"));
+            throw new CompletionException(new APIException("Invalid API response (Status code: " + responseInfo.statusCode() + ")", responseInfo.statusCode()));
         }
 
-        checkError(element);
+        checkError(element, responseInfo);
 
         var body = client.gson().fromJson(element, clazz);
 
@@ -41,7 +41,7 @@ public final class JsonBodyHandler<T> implements HttpResponse.BodyHandler<T> {
      * Check if the response contains an error
      * @param element response JSON element
      */
-    private static void checkError(JsonElement element) {
+    private static void checkError(JsonElement element, HttpResponse.ResponseInfo responseInfo) {
         var json = element.getAsJsonObject();
 
         var success = json.get("success");
@@ -56,7 +56,7 @@ public final class JsonBodyHandler<T> implements HttpResponse.BodyHandler<T> {
                     message = error.getAsJsonPrimitive().getAsString();
                 }
             }
-            throw new CompletionException(new APIException(message));
+            throw new CompletionException(new APIException(message, responseInfo.statusCode()));
         }
     }
 }

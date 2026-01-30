@@ -26,6 +26,7 @@
 - Remove exception that is never thrown from signature of `MclogsClient#analyseLog(Path)`
 - Add annotations for nullability where missing
 - Limits are now applied to all methods that upload logs before the upload happens
+- ApiException now includes the HTTP status code
 
 ---
 
