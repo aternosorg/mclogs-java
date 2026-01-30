@@ -2,32 +2,22 @@ package gs.mclo.api;
 
 import org.jetbrains.annotations.Nullable;
 
-@SuppressWarnings("NotNullFieldNotInitialized")
 public final class Instance {
     private String apiBaseUrl;
-    private String viewLogUrl;
 
     /**
      * Create a new Instance with the default API base URL and view log URL
      */
     public Instance() {
-        this(null, null);
+        this(null);
     }
 
     /**
      * Create a new Instance with a custom API base URL and view log URL
      * @param apiBaseUrl the base URL for the API (e.g. <a href="https://api.mclo.gs/">https://api.mclo.gs/</a>)
-     * @param viewLogUrl the base URL for viewing logs (e.g. <a href="https://mclo.gs/">https://mclo.gs/</a>)
      */
-    public Instance(@Nullable String apiBaseUrl, @Nullable String viewLogUrl) {
-        this.setApiBaseUrl(apiBaseUrl)
-                .setViewLogUrl(viewLogUrl);
-    }
-
-    private String ensureEndsWithSlash(String url) {
-        if (!url.endsWith("/"))
-            url += "/";
-        return url;
+    public Instance(@Nullable String apiBaseUrl) {
+        this.setApiBaseUrl(apiBaseUrl);
     }
 
     /**
@@ -48,35 +38,6 @@ public final class Instance {
             apiBaseUrl = "https://api.mclo.gs/";
 
         this.apiBaseUrl = ensureEndsWithSlash(apiBaseUrl);
-        return this;
-    }
-
-    /**
-     * Get the base URL for viewing logs
-     * @return the base URL for viewing logs
-     */
-    public String getViewLogUrl() {
-        return viewLogUrl;
-    }
-
-    /**
-     * Get the URL for viewing a log
-     * @param id the ID of the log (e.g. HpAwPry)
-     * @return the base URL for viewing logs (e.g. <a href="https://mclo.gs/HpAwPry">https://mclo.gs/HpAwPry</a>)
-     */
-    public String getViewLogUrl(String id) {
-        return viewLogUrl + id;
-    }
-
-    /**
-     * Set the base URL for viewing logs
-     * @param viewLogUrl the base URL for viewing logs (e.g. <a href="https://mclo.gs/">https://mclo.gs/</a>)
-     * @return this
-     */
-    public Instance setViewLogUrl(@Nullable String viewLogUrl) {
-        if (viewLogUrl == null || viewLogUrl.isEmpty())
-            viewLogUrl = "https://mclo.gs/";
-        this.viewLogUrl = ensureEndsWithSlash(viewLogUrl);
         return this;
     }
 
@@ -129,5 +90,11 @@ public final class Instance {
      */
     public String getLogUrl(String id) {
         return apiBaseUrl + "1/log/" + id;
+    }
+
+    private String ensureEndsWithSlash(String url) {
+        if (!url.endsWith("/"))
+            url += "/";
+        return url;
     }
 }

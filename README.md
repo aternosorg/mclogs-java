@@ -136,10 +136,7 @@ System.out.println("Detected problems: " + analysisResult.getAnalysis().getProbl
 
 ### Using a self-hosted instance of mclogs
 ```java
-Instance instance = new Instance()
-        .setApiBaseUrl("https://api.logs.example.com")
-        .setViewLogUrl("https://api.logs.example.com");
-client.setInstance(instance);
+client.setInstance(new Instance("https://api.logs.example.com"));
 ```
 
 ### Checking the storage limits of the current instance

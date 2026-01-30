@@ -7,6 +7,7 @@ import gs.mclo.api.internal.Initializable;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -19,6 +20,13 @@ public class CommonLogResponse implements Initializable {
 
     private String id;
     private @Nullable String source;
+    private Instant created;
+    private Instant expires;
+    private long size;
+    private int lines;
+    private int errors;
+    private String url;
+    private String raw;
     private Set<Metadata<?>> metadata = new HashSet<>();
 
     /**
@@ -40,12 +48,48 @@ public class CommonLogResponse implements Initializable {
     }
 
     /**
-     * Get the metadata associated with this log
+     * Get the creation time of the log
      *
-     * @return the metadata associated with this log
+     * @return the creation time of the log
      */
-    public Set<Metadata<?>> getMetadata() {
-        return metadata;
+    public Instant getCreated() {
+        return created;
+    }
+
+    /**
+     * Get the expiration time of the log
+     *
+     * @return the expiration time of the log
+     */
+    public Instant getExpires() {
+        return expires;
+    }
+
+    /**
+     * Get the size of the log in bytes
+     *
+     * @return the size of the log in bytes
+     */
+    public long getSize() {
+        return size;
+    }
+
+    /**
+     * Get the number of lines in the log
+     *
+     * @return the number of lines in the log
+     */
+    public int getLines() {
+        return lines;
+    }
+
+    /**
+     * Get the number of error lines detected in the log
+     *
+     * @return the number of error lines detected in the log
+     */
+    public int getErrors() {
+        return errors;
     }
 
     /**
@@ -54,7 +98,7 @@ public class CommonLogResponse implements Initializable {
      * @return the url to view this log (e.g. <a href="https://mclo.gs/HpAwPry">https://mclo.gs/HpAwPry</a>)
      */
     public String getUrl() {
-        return client().getInstance().getViewLogUrl(id);
+        return url;
     }
 
     /**
@@ -63,7 +107,16 @@ public class CommonLogResponse implements Initializable {
      * @return the url to view this log raw (e.g. <a href="https://mclo.gs/raw/HpAwPry">https://mclo.gs/raw/HpAwPry</a>)
      */
     public String getRawUrl() {
-        return client().getInstance().getRawLogUrl(id);
+        return raw;
+    }
+
+    /**
+     * Get the metadata associated with this log
+     *
+     * @return the metadata associated with this log
+     */
+    public Set<Metadata<?>> getMetadata() {
+        return metadata;
     }
 
     /**

@@ -319,7 +319,7 @@ public class MclogsClient {
      * @param token deletion token of the log to delete
      * @return a future that completes when the log is deleted
      */
-    public CompletableFuture<Void> deleteLog(String id, @Nullable String token) {
+    public CompletableFuture<Void> deleteLog(String id, String token) {
         HttpRequest request = requestBuilder.request(instance.getLogUrl(id))
                 .header("Authorization", "Bearer " + token)
                 .DELETE()

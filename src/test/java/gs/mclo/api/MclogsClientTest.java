@@ -168,9 +168,7 @@ public class MclogsClientTest extends ApiTest {
     void customInstance() {
         String content = TestUtil.getFileContents("src/test/resources/logs/one.log");
 
-        Instance instance = new Instance("https://api.mclo.gs", "https://mclo.gs")
-                .setApiBaseUrl("https://api.mclo.gs")
-                .setViewLogUrl("https://mclo.gs");
+        Instance instance = new Instance("https://api.mclo.gs");
 
         MclogsClient client = new MclogsClient("aternos/mclogs-java-tests")
                 .setInstance(instance);

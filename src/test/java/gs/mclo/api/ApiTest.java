@@ -13,7 +13,7 @@ public class ApiTest {
         var logViewUrl = System.getenv("MCLOGS_LOG_VIEW_URL");
 
         if ((apiUrl != null && !apiUrl.isBlank()) || (logViewUrl != null && !logViewUrl.isBlank())) {
-            client.setInstance(new Instance(apiUrl, logViewUrl));
+            client.setInstance(new Instance(apiUrl));
         }
 
         Thread.sleep(50); // Avoid rate limiting

@@ -12,6 +12,7 @@
 - `LimitedReader` and `Util` are now internal
 - `LogReader` has been split into multiple classes in the `reader` package.
 - Removed deprecated constants and constructor from the `Log` class.
+- Mclogs instances running v1 are no longer supported.
 
 ## New Features
 - You can now specify a source and other metadata when uploading logs. By default, this is filled with the project name
