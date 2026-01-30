@@ -42,3 +42,4 @@ jobs:
             ./build/libs/mclogs-*.jar
           body_path: ${{ github.workspace }}/release-body.md
           name: v${{ github.ref_name }}
+          prerelease: ${{ contains(github.ref, '-SNAPSHOT') }}
