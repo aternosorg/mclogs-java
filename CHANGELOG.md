@@ -1,3 +1,11 @@
+# v6.1.0
+
+## Improvements
+- Add `listFilesInDirectory` method to `MclogsClient`. [^1]
+ 
+[^1]: This is the equivalent of `listLogsInDirectory` and `listCrashReportsInDirectory` but searches in the directory
+itself, not a subfolder. Before 6.0, this was available as a static method of the `Util` class
+
 # v6.0.0
 
 ## Breaking Changes

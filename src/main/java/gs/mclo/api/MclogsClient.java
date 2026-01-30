@@ -5,8 +5,8 @@ import com.google.gson.GsonBuilder;
 import gs.mclo.api.data.LogField;
 import gs.mclo.api.internal.JsonBodyHandler;
 import gs.mclo.api.internal.RequestBuilder;
-import gs.mclo.api.internal.Util;
 import gs.mclo.api.internal.gson.InstantTypeAdapter;
+import gs.mclo.api.reader.FileLogReader;
 import gs.mclo.api.response.GetLogResponse;
 import gs.mclo.api.response.InsightsResponse;
 import gs.mclo.api.response.Limits;
@@ -14,6 +14,7 @@ import gs.mclo.api.response.UploadLogResponse;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -304,7 +305,7 @@ public class MclogsClient {
      * @return log file names
      */
     public String[] listLogsInDirectory(Path directory) {
-        return Util.listFilesInDirectory(directory.resolve("logs"));
+        return listFilesInDirectory(directory.resolve("logs"));
     }
 
     /**
@@ -324,7 +325,32 @@ public class MclogsClient {
      * @return log file names
      */
     public String[] listCrashReportsInDirectory(Path directory) {
-        return Util.listFilesInDirectory(directory.resolve("crash-reports"));
+        return listFilesInDirectory(directory.resolve("crash-reports"));
+    }
+
+    /**
+     * List all files in a directory that match the allowed file name pattern
+     * @param directory directory to list files from
+     * @return array of file names that can be uploaded
+     */
+    public static String[] listFilesInDirectory(File directory) {
+        String[] files = directory.list();
+        if (files == null)
+            files = new String[0];
+
+        return Arrays.stream(files)
+                .filter(f -> f.matches(FileLogReader.ALLOWED_FILE_NAME_PATTERN.pattern()))
+                .sorted()
+                .toArray(String[]::new);
+    }
+
+    /**
+     * List all files in a directory that match the allowed file name pattern
+     * @param directory directory to list files from
+     * @return array of file names that can be uploaded
+     */
+    public static String[] listFilesInDirectory(Path directory) {
+        return listFilesInDirectory(directory.toFile());
     }
 
     /**
