@@ -3,12 +3,9 @@ package gs.mclo.api;
 import gs.mclo.api.data.LogField;
 import gs.mclo.api.data.Metadata;
 import gs.mclo.api.reader.FileLogReader;
-import gs.mclo.api.response.Limits;
 import gs.mclo.api.util.TestUtil;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.Arrays;
@@ -86,7 +83,7 @@ public class MclogsClientTest extends ApiTest {
     @Test
     void shareLogWithMetadata() {
         Log request;
-        request = new Log(new FileLogReader(Paths.get("src/test/resources/logs/one.log"), Limits.DEFAULT));
+        request = new Log(new FileLogReader(Paths.get("src/test/resources/logs/one.log")));
         request.setSource("mclogs-java-tests");
         request.addMetadata(new Metadata<>("key-a", "value-a", "Label A", true));
         client.uploadLog(request)

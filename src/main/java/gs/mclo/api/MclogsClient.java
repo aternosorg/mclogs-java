@@ -8,9 +8,7 @@ import gs.mclo.api.internal.RequestBuilder;
 import gs.mclo.api.internal.Util;
 import gs.mclo.api.internal.gson.InstantTypeAdapter;
 import gs.mclo.api.internal.request.UploadLogRequestBody;
-import gs.mclo.api.reader.FileLogReader;
 import gs.mclo.api.reader.LogReader;
-import gs.mclo.api.reader.StringLogReader;
 import gs.mclo.api.response.GetLogResponse;
 import gs.mclo.api.response.InsightsResponse;
 import gs.mclo.api.response.Limits;
@@ -39,6 +37,7 @@ public class MclogsClient {
             .build();
 
     private Instance instance = new Instance();
+    private @Nullable Limits limits;
     private final RequestBuilder requestBuilder = new RequestBuilder();
 
     /**
@@ -136,6 +135,7 @@ public class MclogsClient {
      */
     public MclogsClient setInstance(Instance instance) {
         this.instance = instance;
+        this.limits = null;
         return this;
     }
 
@@ -146,44 +146,45 @@ public class MclogsClient {
      * @return the response
      */
     public CompletableFuture<UploadLogResponse> uploadLog(Log log) {
-        if (log.getSource() == null) {
-            log.setSource(requestBuilder.getProjectName());
-        }
-
-        // Try new upload method
-        HttpRequest request;
-        try {
-            var body = gson.toJson(new UploadLogRequestBody(log.getContent(), log.getSource(), log.getMetadata()));
-            request = requestBuilder.uploadRequest(instance.getLogUploadUrl(), body)
-                    .header("Content-Type", "application/json")
-                    .build();
-        } catch (IOException e) {
-            return CompletableFuture.failedFuture(e);
-        }
-
-        return asyncRequest(request, UploadLogResponse.class).handle((response, throwable) -> {
-            // No idea why IntelliJ is complaining about this being always true. response is clearly nullable here.
-            //noinspection ConstantValue
-            if (response != null) {
-                return CompletableFuture.completedFuture(response);
+        return getLimitsOrDefault().thenCompose(limits -> {
+            if (log.getSource() == null) {
+                log.setSource(requestBuilder.getProjectName());
             }
 
+            // Try new upload method
+            HttpRequest request;
+            try {
+                var body = gson.toJson(new UploadLogRequestBody(log.getContent(limits), log.getSource(), log.getMetadata()));
+                request = requestBuilder.uploadRequest(instance.getLogUploadUrl(), body)
+                        .header("Content-Type", "application/json")
+                        .build();
+            } catch (IOException e) {
+                return CompletableFuture.failedFuture(e);
+            }
 
-            if (throwable != null && throwable.getCause() instanceof APIException) {
-                APIException apiException = (APIException) throwable.getCause();
-                if (apiException.getMessage().contains("Required POST argument 'content' not found")) {
-                    // Fallback to old upload method
-                    HttpRequest fallbackRequest = null;
-                    try {
-                        fallbackRequest = requestBuilder.legacyUpload(instance.getLogUploadUrl(), log);
-                    } catch (IOException e) {
-                        throw new CompletionException(e);
-                    }
-                    return asyncRequest(fallbackRequest, UploadLogResponse.class);
+            return asyncRequest(request, UploadLogResponse.class).handle((response, throwable) -> {
+                // No idea why IntelliJ is complaining about this being always true. response is clearly nullable here.
+                //noinspection ConstantValue
+                if (response != null) {
+                    return CompletableFuture.completedFuture(response);
                 }
-            }
-            throw new CompletionException(throwable);
-        }).thenCompose(x -> x);
+
+                if (throwable != null && throwable.getCause() instanceof APIException) {
+                    APIException apiException = (APIException) throwable.getCause();
+                    if (apiException.getMessage().contains("Required POST argument 'content' not found")) {
+                        // Fallback to old upload method
+                        HttpRequest fallbackRequest = null;
+                        try {
+                            fallbackRequest = requestBuilder.legacyUpload(instance.getLogUploadUrl(), log, limits);
+                        } catch (IOException e) {
+                            throw new CompletionException(e);
+                        }
+                        return asyncRequest(fallbackRequest, UploadLogResponse.class);
+                    }
+                }
+                throw new CompletionException(throwable);
+            }).thenCompose(x -> x);
+        });
     }
 
     /**
@@ -193,7 +194,7 @@ public class MclogsClient {
      * @return the response
      */
     public CompletableFuture<UploadLogResponse> uploadLog(String log) {
-        return this.getLog(log, StringLogReader::new).thenCompose(this::uploadLog);
+        return this.uploadLog(new Log(log));
     }
 
     /**
@@ -203,7 +204,7 @@ public class MclogsClient {
      * @return the response
      */
     public CompletableFuture<UploadLogResponse> uploadLog(Path log) {
-        return this.getLog(log, FileLogReader::new).thenCompose(this::uploadLog);
+        return this.uploadLog(new Log(log));
     }
 
     /**
@@ -240,13 +241,14 @@ public class MclogsClient {
      * @return the insights of the log
      */
     public CompletableFuture<InsightsResponse> analyseLog(Log log) {
-        HttpRequest request;
-        try {
-            request = requestBuilder.legacyUpload(instance.getLogAnalysisUrl(), log);
-        } catch (IOException e) {
-            return CompletableFuture.failedFuture(e);
-        }
-        return asyncRequest(request, InsightsResponse.class);
+        return this.getLimitsOrDefault().thenCompose(limits -> {
+            try {
+                HttpRequest request = requestBuilder.legacyUpload(instance.getLogAnalysisUrl(), log, limits);
+                return asyncRequest(request, InsightsResponse.class);
+            } catch (IOException e) {
+                return CompletableFuture.failedFuture(e);
+            }
+        });
     }
 
     /**
@@ -256,7 +258,7 @@ public class MclogsClient {
      * @return the insights of the log
      */
     public CompletableFuture<InsightsResponse> analyseLog(String log) {
-        return this.getLog(log, StringLogReader::new).thenCompose(this::analyseLog);
+        return this.analyseLog(new Log(log));
     }
 
     /**
@@ -266,7 +268,7 @@ public class MclogsClient {
      * @return the insights of the log
      */
     public CompletableFuture<InsightsResponse> analyseLog(Path log) {
-        return this.getLog(log, FileLogReader::new).thenCompose(this::analyseLog);
+        return this.analyseLog(new Log(log));
     }
 
     /**
@@ -275,11 +277,19 @@ public class MclogsClient {
      * @return the storage limits
      */
     public CompletableFuture<Limits> getLimits() {
+        var limits = this.limits;
+        if (limits != null) {
+            return CompletableFuture.completedFuture(limits);
+        }
+
         HttpRequest request = requestBuilder.request(instance.getStorageLimitUrl())
                 .header("Accept", "application/json")
                 .GET()
                 .build();
-        return asyncRequest(request, Limits.class);
+        return asyncRequest(request, Limits.class).thenApply(result -> {
+            this.limits = result;
+            return result;
+        });
     }
 
     /**

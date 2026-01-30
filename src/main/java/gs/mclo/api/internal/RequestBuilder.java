@@ -1,6 +1,7 @@
 package gs.mclo.api.internal;
 
 import gs.mclo.api.Log;
+import gs.mclo.api.response.Limits;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -95,8 +96,8 @@ public final class RequestBuilder {
                 .POST(CustomBodyPublishers.ofGzipString(body));
     }
 
-    public HttpRequest legacyUpload(String url, Log log) throws IOException {
-        return uploadRequest(url, "content=" + URLEncoder.encode(log.getContent(), StandardCharsets.UTF_8))
+    public HttpRequest legacyUpload(String url, Log log, Limits limits) throws IOException {
+        return uploadRequest(url, "content=" + URLEncoder.encode(log.getContent(limits), StandardCharsets.UTF_8))
                 .header("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
                 .build();
     }

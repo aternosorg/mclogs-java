@@ -1,7 +1,5 @@
 package gs.mclo.api.reader;
 
-import gs.mclo.api.response.Limits;
-
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -21,17 +19,17 @@ public final class FileLogReader extends LogReader {
 
     private final Path path;
 
-    public FileLogReader(Path path, Limits limits) {
-        super(limits);
+    public FileLogReader(Path path) {
+        super();
         this.path = Objects.requireNonNull(path, "Path must not be null");
-
-        if (!path.getFileName().toString().matches(ALLOWED_FILE_NAME_PATTERN.pattern())) {
-            throw new IllegalArgumentException("Forbidden log file name: " + path.getFileName());
-        }
     }
 
     @Override
     protected Reader getReader() throws IOException {
+        if (!path.getFileName().toString().matches(ALLOWED_FILE_NAME_PATTERN.pattern())) {
+            throw new IllegalArgumentException("Forbidden log file name: " + path.getFileName());
+        }
+
         File file = path.toFile();
         if (!file.exists() || !file.isFile()) {
             throw new FileNotFoundException("Log '" + path + "' does not exist");

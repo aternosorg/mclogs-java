@@ -64,8 +64,8 @@ public class Log {
      *
      * @param logFile Path to the log file, which must have a file extension of '.log' or '.txt'. The file extension may be suffixed by both `.0` and `.gz`
      */
-    public Log(Path logFile, Limits limits) {
-        this(new FileLogReader(logFile, limits));
+    public Log(Path logFile) {
+        this(new FileLogReader(logFile));
     }
 
     /**
@@ -73,8 +73,8 @@ public class Log {
      *
      * @param content The whole content of the log.
      */
-    public Log(String content, Limits limits) {
-        this(new StringLogReader(content, limits));
+    public Log(String content) {
+        this(new StringLogReader(content));
     }
 
     /**
@@ -159,12 +159,12 @@ public class Log {
     /**
      * @return log content
      */
-    public String getContent() throws IOException {
+    public String getContent(Limits limits) throws IOException {
         if (content != null) {
             return content;
         }
 
-        this.content = this.filter(reader.readContents());
+        this.content = this.filter(reader.readContents(limits));
         return content;
     }
 

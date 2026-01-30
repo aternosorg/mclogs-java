@@ -11,13 +11,8 @@ import java.io.StringWriter;
 
 @ApiStatus.NonExtendable
 public abstract class LogReader {
-    /**
-     * The limits used to filter this log
-     */
-    private final Limits limits;
 
-    protected LogReader(Limits limits) {
-        this.limits = limits;
+    protected LogReader() {
     }
 
     /**
@@ -27,7 +22,7 @@ public abstract class LogReader {
      * @throws FileNotFoundException if the log file does not exist
      * @throws IOException           if an I/O error occurs
      */
-    public String readContents() throws IOException {
+    public String readContents(Limits limits) throws IOException {
         try (var reader = new LimitedReader(this.getReader(), limits)) {
             return read(reader);
         }
