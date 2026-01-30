@@ -333,7 +333,7 @@ public class MclogsClient {
      * @param directory directory to list files from
      * @return array of file names that can be uploaded
      */
-    public static String[] listFilesInDirectory(File directory) {
+    public String[] listFilesInDirectory(File directory) {
         String[] files = directory.list();
         if (files == null)
             files = new String[0];
@@ -349,7 +349,7 @@ public class MclogsClient {
      * @param directory directory to list files from
      * @return array of file names that can be uploaded
      */
-    public static String[] listFilesInDirectory(Path directory) {
+    public String[] listFilesInDirectory(Path directory) {
         return listFilesInDirectory(directory.toFile());
     }
 
