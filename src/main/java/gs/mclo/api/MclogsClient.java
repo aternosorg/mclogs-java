@@ -7,8 +7,6 @@ import gs.mclo.api.internal.JsonBodyHandler;
 import gs.mclo.api.internal.RequestBuilder;
 import gs.mclo.api.internal.Util;
 import gs.mclo.api.internal.gson.InstantTypeAdapter;
-import gs.mclo.api.internal.request.UploadLogRequestBody;
-import gs.mclo.api.reader.LogReader;
 import gs.mclo.api.response.GetLogResponse;
 import gs.mclo.api.response.InsightsResponse;
 import gs.mclo.api.response.Limits;
@@ -61,12 +59,12 @@ public class MclogsClient {
     }
 
     /**
-     * Create a new Mclogs instance for a project running alongside minecraft (e.g. a mod or plugin)
-     * If you're not running alongside minecraft, use {@link #MclogsClient(String, String)}
+     * Create a new Mclogs instance for a project running alongside Minecraft (e.g. a mod or plugin)
+     * If you're not running alongside Minecraft, use {@link #MclogsClient(String, String)}
      *
      * @param projectName      the name of your project (used for the user agent)
      * @param projectVersion   the version of your project (used for the user agent)
-     * @param minecraftVersion the version of minecraft (used for the user agent)
+     * @param minecraftVersion the version of Minecraft this library is being used in (used for the user agent)
      */
     public MclogsClient(String projectName, String projectVersion, @Nullable String minecraftVersion) {
         this.setProjectName(projectName);
@@ -108,9 +106,9 @@ public class MclogsClient {
     }
 
     /**
-     * Set the minecraft version (used for the user agent)
+     * Set the Minecraft version this library is being used in (used for the user agent)
      *
-     * @param minecraftVersion the version of minecraft
+     * @param minecraftVersion the version of Minecraft
      * @return this
      */
     public MclogsClient setMinecraftVersion(@Nullable String minecraftVersion) {

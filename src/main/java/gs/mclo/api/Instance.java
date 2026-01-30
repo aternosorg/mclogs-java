@@ -1,6 +1,6 @@
 package gs.mclo.api;
 
-import org.jetbrains.annotations.Nullable;
+import java.util.Objects;
 
 public final class Instance {
     private String apiBaseUrl;
@@ -9,14 +9,14 @@ public final class Instance {
      * Create a new Instance with the default API base URL and view log URL
      */
     public Instance() {
-        this(null);
+        this("https://api.mclo.gs/");
     }
 
     /**
      * Create a new Instance with a custom API base URL and view log URL
      * @param apiBaseUrl the base URL for the API (e.g. <a href="https://api.mclo.gs/">https://api.mclo.gs/</a>)
      */
-    public Instance(@Nullable String apiBaseUrl) {
+    public Instance(String apiBaseUrl) {
         this.setApiBaseUrl(apiBaseUrl);
     }
 
@@ -33,9 +33,10 @@ public final class Instance {
      * @param apiBaseUrl the base URL for the API (e.g. <a href="https://api.mclo.gs/">https://api.mclo.gs/</a>)
      * @return this
      */
-    public Instance setApiBaseUrl(@Nullable String apiBaseUrl) {
-        if (apiBaseUrl == null || apiBaseUrl.isEmpty())
-            apiBaseUrl = "https://api.mclo.gs/";
+    public Instance setApiBaseUrl(String apiBaseUrl) {
+        if (Objects.requireNonNull(apiBaseUrl).isBlank()) {
+            throw new IllegalArgumentException("API base URL cannot be null or blank");
+        }
 
         this.apiBaseUrl = ensureEndsWithSlash(apiBaseUrl);
         return this;

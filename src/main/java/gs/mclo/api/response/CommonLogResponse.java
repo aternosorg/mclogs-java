@@ -116,7 +116,7 @@ public class CommonLogResponse implements Initializable {
      * @return the metadata associated with this log
      */
     public Set<Metadata<?>> getMetadata() {
-        return metadata;
+        return new HashSet<>(metadata);
     }
 
     /**

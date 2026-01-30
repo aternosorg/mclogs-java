@@ -194,7 +194,7 @@ public class Log {
      * @return Set of metadata.
      */
     public Set<Metadata<?>> getMetadata() {
-        return metadata;
+        return new HashSet<>(metadata);
     }
 
     /**

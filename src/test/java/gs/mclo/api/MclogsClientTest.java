@@ -16,52 +16,46 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class MclogsClientTest extends ApiTest {
+
     @Test
-    void listLogs() {
-        assertArrayEquals(
-                Stream.of("one.log", "three.log.gz", "two.log").sorted().toArray(String[]::new),
-                Arrays.stream(client.listLogsInDirectory("src/test/resources")).sorted().toArray(String[]::new)
-        );
+    void userAgents() {
+        //noinspection DataFlowIssue
+        assertThrows(IllegalArgumentException.class, () -> new MclogsClient(null));
+        assertThrows(IllegalArgumentException.class, () -> new MclogsClient(""));
+        //noinspection DataFlowIssue
+        assertThrows(IllegalArgumentException.class, () -> new MclogsClient("aternos/mclogs-java-tests", null));
+        //noinspection DataFlowIssue
+        assertThrows(IllegalArgumentException.class, () -> new MclogsClient(null, "1.0.0"));
+        assertThrows(IllegalArgumentException.class, () -> new MclogsClient("", "1.0.0"));
+        assertThrows(IllegalArgumentException.class, () -> new MclogsClient("a", ""));
+        assertDoesNotThrow(() -> new MclogsClient("project", "1.0.0"));
+        assertDoesNotThrow(() -> new MclogsClient("project", "1.0.0", "1.12.2"));
     }
 
     @Test
-    void listLogsNoDir() {
-        assertArrayEquals(
-                new String[0],
-                Arrays.stream(client.listLogsInDirectory("src/test/resources/directory")).sorted().toArray(String[]::new)
-        );
+    void userAgentsSetters() {
+        //noinspection DataFlowIssue
+        assertThrows(IllegalArgumentException.class, () -> client.setCustomUserAgent(null));
+        assertThrows(IllegalArgumentException.class, () -> client.setCustomUserAgent(""));
+        //noinspection DataFlowIssue
+        assertThrows(IllegalArgumentException.class, () -> client.setProjectName(null));
+        assertThrows(IllegalArgumentException.class, () -> client.setProjectName(""));
+        //noinspection DataFlowIssue
+        assertThrows(IllegalArgumentException.class, () -> client.setProjectVersion(null));
+        assertThrows(IllegalArgumentException.class, () -> client.setProjectVersion(""));
+
+        assertSame(client, client.setCustomUserAgent("custom-agent/1.0"));
+        assertSame(client, client.setProjectName("project"));
+        assertSame(client, client.setProjectVersion("1.0.0"));
+        assertSame(client, client.setMinecraftVersion("1.0.0"));
     }
 
     @Test
-    void listLogsEmptyDir() {
-        assertArrayEquals(
-                new String[0],
-                Arrays.stream(client.listLogsInDirectory("src/test/resources/empty")).sorted().toArray(String[]::new)
-        );
-    }
-
-    @Test
-    void listCrashReports() {
-        assertArrayEquals(
-                Stream.of("eight.txt", "seven.log.gz", "five.log").sorted().toArray(String[]::new),
-                Arrays.stream(client.listCrashReportsInDirectory("src/test/resources")).sorted().toArray(String[]::new)
-        );
-    }
-
-    @Test
-    void listCrashReportsNoDir() {
-        assertArrayEquals(
-                new String[0],
-                Arrays.stream(client.listCrashReportsInDirectory("src/test/resources/dir")).sorted().toArray(String[]::new)
-        );
-    }
-
-    @Test
-    void listCrashReportsEmptyDir() {
-        assertArrayEquals(
-                new String[0],
-                Arrays.stream(client.listCrashReportsInDirectory("src/test/resources/empty")).sorted().toArray(String[]::new)
-        );
+    void customInstance() {
+        assertEquals("https://api.mclo.gs/", client.getInstance().getApiBaseUrl());
+        Instance instance = new Instance("https://custom.url");
+        assertSame(client, client.setInstance(instance));
+        assertEquals("https://custom.url/", client.getInstance().getApiBaseUrl());
     }
 
     @Test
@@ -101,10 +95,8 @@ public class MclogsClientTest extends ApiTest {
                     assertTrue(res.getExpires().isAfter(Instant.ofEpochSecond(1769690721)), "Expected log to expire after this test was written");
                     assertTrue(res.getExpires().isBefore(Instant.ofEpochSecond(1769690721000L)), "Expected log expire within the next 50k years");
 
-                    assertNotNull(res.getSize());
                     assertTrue(res.getSize() > 10, "Expected log size to be greater than 10 bytes");
 
-                    assertNotNull(res.getLines());
                     assertEquals(1, res.getLines());
                     assertEquals(0, res.getErrors());
 
@@ -147,44 +139,6 @@ public class MclogsClientTest extends ApiTest {
     void shareSecretFile() {
         CompletableFuture<?> future = client.uploadLog(Paths.get("src/test/resources/logs/secret.secret"));
         assertThrows(Exception.class, future::join);
-    }
-
-    @Test
-    void userAgents() {
-        //noinspection DataFlowIssue
-        assertThrows(IllegalArgumentException.class, () -> new MclogsClient(null));
-        assertThrows(IllegalArgumentException.class, () -> new MclogsClient(""));
-        //noinspection DataFlowIssue
-        assertThrows(IllegalArgumentException.class, () -> new MclogsClient("aternos/mclogs-java-tests", null));
-        //noinspection DataFlowIssue
-        assertThrows(IllegalArgumentException.class, () -> new MclogsClient(null, "1.0.0"));
-        assertThrows(IllegalArgumentException.class, () -> new MclogsClient("", "1.0.0"));
-        assertThrows(IllegalArgumentException.class, () -> new MclogsClient("a", ""));
-        assertDoesNotThrow(() -> new MclogsClient("project", "1.0.0"));
-        assertDoesNotThrow(() -> new MclogsClient("project", "1.0.0", "1.12.2"));
-    }
-
-    @Test
-    void customInstance() {
-        String content = TestUtil.getFileContents("src/test/resources/logs/one.log");
-
-        Instance instance = new Instance("https://api.mclo.gs");
-
-        MclogsClient client = new MclogsClient("aternos/mclogs-java-tests")
-                .setInstance(instance);
-        client.uploadLog(content)
-                .thenCompose(res -> {
-                    assertNotNull(res.getId());
-                    assertNotNull(res.getUrl());
-                    System.out.println("Test log has been shared at " + res.getUrl());
-                    return res.getRawContent()
-                            .thenCompose(raw -> {
-                                assertEquals(content, raw);
-                                return res.delete();
-                            });
-                })
-                .orTimeout(10, TimeUnit.SECONDS)
-                .join();
     }
 
     @Test
@@ -246,8 +200,21 @@ public class MclogsClientTest extends ApiTest {
     }
 
     @Test
-    void analyseLog() {
+    void analyseLogPath() {
         client.analyseLog(Paths.get("src/test/resources/logs/three.log.gz"))
+                .thenAccept(insights -> {
+                    assertNotNull(insights);
+                    assertNotNull(insights.getAnalysis());
+                    assertNotNull(insights.getAnalysis().getInformation());
+                    assertNotNull(insights.getAnalysis().getProblems());
+                })
+                .orTimeout(10, TimeUnit.SECONDS)
+                .join();
+    }
+
+    @Test
+    void analyseLogString() {
+        client.analyseLog("test")
                 .thenAccept(insights -> {
                     assertNotNull(insights);
                     assertNotNull(insights.getAnalysis());
@@ -269,5 +236,59 @@ public class MclogsClientTest extends ApiTest {
                 })
                 .orTimeout(10, TimeUnit.SECONDS)
                 .join();
+
+        var cached = client.getLimits();
+        // Test that caching works
+        assertTrue(cached.isDone());
+        assertFalse(cached.isCompletedExceptionally());
+        assertFalse(cached.isCancelled());
+    }
+
+    @Test
+    void listLogs() {
+        assertArrayEquals(
+                Stream.of("one.log", "three.log.gz", "two.log").sorted().toArray(String[]::new),
+                Arrays.stream(client.listLogsInDirectory("src/test/resources")).sorted().toArray(String[]::new)
+        );
+    }
+
+    @Test
+    void listLogsNoDir() {
+        assertArrayEquals(
+                new String[0],
+                Arrays.stream(client.listLogsInDirectory("src/test/resources/directory")).sorted().toArray(String[]::new)
+        );
+    }
+
+    @Test
+    void listLogsEmptyDir() {
+        assertArrayEquals(
+                new String[0],
+                Arrays.stream(client.listLogsInDirectory("src/test/resources/empty")).sorted().toArray(String[]::new)
+        );
+    }
+
+    @Test
+    void listCrashReports() {
+        assertArrayEquals(
+                Stream.of("eight.txt", "seven.log.gz", "five.log").sorted().toArray(String[]::new),
+                Arrays.stream(client.listCrashReportsInDirectory("src/test/resources")).sorted().toArray(String[]::new)
+        );
+    }
+
+    @Test
+    void listCrashReportsNoDir() {
+        assertArrayEquals(
+                new String[0],
+                Arrays.stream(client.listCrashReportsInDirectory("src/test/resources/dir")).sorted().toArray(String[]::new)
+        );
+    }
+
+    @Test
+    void listCrashReportsEmptyDir() {
+        assertArrayEquals(
+                new String[0],
+                Arrays.stream(client.listCrashReportsInDirectory("src/test/resources/empty")).sorted().toArray(String[]::new)
+        );
     }
 }
