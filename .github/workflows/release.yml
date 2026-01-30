@@ -30,7 +30,7 @@ jobs:
           JRELEASER_NEXUS2_TOKEN: ${{ secrets.SONATYPE_OSSRH_PASSWORD }}
           JRELEASER_MAVENCENTRAL_USERNAME: ${{ secrets.SONATYPE_OSSRH_USERNAME }}
           JRELEASER_MAVENCENTRAL_TOKEN: ${{ secrets.SONATYPE_OSSRH_PASSWORD }}
-        run: ./gradlew clean publish jreleaserDeploy --no-daemon -Prelease=${{ github.ref_name }}
+        run: ./gradlew clean publish jreleaserDeploy --info --no-daemon -Prelease=${{ github.ref_name }}
 
       - name: Generate Release Body
         run: ./gradlew generateReleaseBody
