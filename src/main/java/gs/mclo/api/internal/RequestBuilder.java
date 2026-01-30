@@ -1,16 +1,18 @@
 package gs.mclo.api.internal;
 
+import com.google.gson.Gson;
 import gs.mclo.api.Log;
+import gs.mclo.api.internal.request.UploadLogRequestBody;
 import gs.mclo.api.response.Limits;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URLEncoder;
 import java.net.http.HttpRequest;
-import java.nio.charset.StandardCharsets;
 
 public final class RequestBuilder {
+
+    private final Gson gson;
 
     private @Nullable String projectName = null;
     private @Nullable String projectVersion = null;
@@ -18,6 +20,10 @@ public final class RequestBuilder {
     private @Nullable String minecraftVersion = null;
 
     private @Nullable String customUserAgent = null;
+
+    public RequestBuilder(Gson gson) {
+        this.gson = gson;
+    }
 
     /**
      * Set a custom user agent. This will always be preferred over the project name and version.
@@ -89,16 +95,16 @@ public final class RequestBuilder {
                 .header("User-Agent", this.getUserAgent());
     }
 
-    public HttpRequest.Builder uploadRequest(String url, String body) throws IOException {
+    public HttpRequest uploadRequest(String url, Log log, Limits limits) throws IOException {
         return request(url)
+                .header("Content-Type", "application/json")
                 .header("Content-Encoding", "gzip")
                 .header("Accept", "application/json")
-                .POST(CustomBodyPublishers.ofGzipString(body));
-    }
-
-    public HttpRequest legacyUpload(String url, Log log, Limits limits) throws IOException {
-        return uploadRequest(url, "content=" + URLEncoder.encode(log.getContent(limits), StandardCharsets.UTF_8))
-                .header("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+                .POST(CustomBodyPublishers.ofGzipString(gson.toJson(
+                        new UploadLogRequestBody(log.getContent(limits),
+                                log.getSource(),
+                                log.getMetadata())))
+                )
                 .build();
     }
 

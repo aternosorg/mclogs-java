@@ -24,8 +24,6 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
-import java.util.function.BiFunction;
 
 public class MclogsClient {
     private final Gson gson = new GsonBuilder()
@@ -38,7 +36,7 @@ public class MclogsClient {
 
     private Instance instance = new Instance();
     private @Nullable Limits limits;
-    private final RequestBuilder requestBuilder = new RequestBuilder();
+    private final RequestBuilder requestBuilder = new RequestBuilder(gson);
 
     /**
      * Create a new Mclogs instance with a custom user agent
@@ -151,39 +149,12 @@ public class MclogsClient {
                 log.setSource(requestBuilder.getProjectName());
             }
 
-            // Try new upload method
-            HttpRequest request;
             try {
-                var body = gson.toJson(new UploadLogRequestBody(log.getContent(limits), log.getSource(), log.getMetadata()));
-                request = requestBuilder.uploadRequest(instance.getLogUploadUrl(), body)
-                        .header("Content-Type", "application/json")
-                        .build();
+                HttpRequest request = requestBuilder.uploadRequest(instance.getLogUploadUrl(), log, limits);
+                return asyncRequest(request, UploadLogResponse.class);
             } catch (IOException e) {
                 return CompletableFuture.failedFuture(e);
             }
-
-            return asyncRequest(request, UploadLogResponse.class).handle((response, throwable) -> {
-                // No idea why IntelliJ is complaining about this being always true. response is clearly nullable here.
-                //noinspection ConstantValue
-                if (response != null) {
-                    return CompletableFuture.completedFuture(response);
-                }
-
-                if (throwable != null && throwable.getCause() instanceof APIException) {
-                    APIException apiException = (APIException) throwable.getCause();
-                    if (apiException.getMessage().contains("Required POST argument 'content' not found")) {
-                        // Fallback to old upload method
-                        HttpRequest fallbackRequest = null;
-                        try {
-                            fallbackRequest = requestBuilder.legacyUpload(instance.getLogUploadUrl(), log, limits);
-                        } catch (IOException e) {
-                            throw new CompletionException(e);
-                        }
-                        return asyncRequest(fallbackRequest, UploadLogResponse.class);
-                    }
-                }
-                throw new CompletionException(throwable);
-            }).thenCompose(x -> x);
         });
     }
 
@@ -243,7 +214,7 @@ public class MclogsClient {
     public CompletableFuture<InsightsResponse> analyseLog(Log log) {
         return this.getLimitsOrDefault().thenCompose(limits -> {
             try {
-                HttpRequest request = requestBuilder.legacyUpload(instance.getLogAnalysisUrl(), log, limits);
+                HttpRequest request = requestBuilder.uploadRequest(instance.getLogAnalysisUrl(), log, limits);
                 return asyncRequest(request, InsightsResponse.class);
             } catch (IOException e) {
                 return CompletableFuture.failedFuture(e);
@@ -375,10 +346,6 @@ public class MclogsClient {
 
     private CompletableFuture<Limits> getLimitsOrDefault() {
         return this.getLimits().exceptionally(t -> Limits.DEFAULT);
-    }
-
-    private <T> CompletableFuture<Log> getLog(T log, BiFunction<T, Limits, LogReader> constructor) {
-        return this.getLimitsOrDefault().thenApply(limits -> new Log(constructor.apply(log, limits)));
     }
 
     @ApiStatus.Internal

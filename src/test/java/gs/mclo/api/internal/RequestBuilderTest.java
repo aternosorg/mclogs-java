@@ -1,15 +1,21 @@
 package gs.mclo.api.internal;
 
-import gs.mclo.api.MclogsClient;
+import com.google.gson.Gson;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class RequestBuilderTest {
+    private RequestBuilder builder;
+
+    @BeforeEach
+    void setUp() {
+        builder = new RequestBuilder(new Gson());
+    }
 
     @Test
     void fullUserAgent() {
-        RequestBuilder builder = new RequestBuilder();
         builder.setProjectName("asd");
         builder.setMinecraftVersion("1.12.2");
         builder.setProjectVersion("1.0.0");
@@ -19,7 +25,6 @@ public class RequestBuilderTest {
 
     @Test
     void shortUserAgent() {
-        RequestBuilder builder = new RequestBuilder();
         builder.setProjectName("asd");
         builder.setProjectVersion("1.0.0");
         var request = builder.request("https://example.com").build();
@@ -28,7 +33,6 @@ public class RequestBuilderTest {
 
     @Test
     void customUserAgent() {
-        RequestBuilder builder = new RequestBuilder();
         builder.setCustomUserAgent("asd");
         var request = builder.request("https://example.com").build();
         assertEquals("asd", request.headers().firstValue("User-Agent").orElse(""));
