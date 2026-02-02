@@ -10,6 +10,8 @@
 - `Log#getContent(Limits)` is now deprecated. The new `getContent(FilterList)` method is internal and might change without notice.
 - `LogReader#readContents(Limits)` is now deprecated. The new `readContents(FilterList)` method is internal and might change without notice.
 
+---
+
 # v6.1.0
 
 ## Improvements
