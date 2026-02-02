@@ -1,7 +1,6 @@
 package gs.mlco.api;
 
 import gs.mclo.api.internal.LimitedReader;
-import gs.mclo.api.response.Limits;
 import org.openjdk.jmh.annotations.*;
 
 import java.io.*;

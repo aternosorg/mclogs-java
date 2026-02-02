@@ -1,6 +1,5 @@
 package gs.mclo.api.internal;
 
-import com.google.gson.JsonParser;
 import gs.mclo.api.APIException;
 import gs.mclo.api.ApiTest;
 import gs.mclo.api.response.UploadLogResponse;
