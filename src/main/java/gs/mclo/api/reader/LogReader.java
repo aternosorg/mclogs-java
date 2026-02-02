@@ -2,6 +2,8 @@ package gs.mclo.api.reader;
 
 import gs.mclo.api.internal.LimitedReader;
 import gs.mclo.api.response.Limits;
+import gs.mclo.api.internal.filter.FilterList;
+import gs.mclo.api.internal.filter.TrimFilter;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.io.FileNotFoundException;
@@ -22,8 +24,28 @@ public abstract class LogReader {
      * @throws FileNotFoundException if the log file does not exist
      * @throws IOException           if an I/O error occurs
      */
+    @Deprecated
     public String readContents(Limits limits) throws IOException {
-        try (var reader = new LimitedReader(this.getReader(), limits)) {
+        try (var reader = new LimitedReader(this.getReader(), limits.getMaxLength(), limits.getMaxLines(), true)) {
+            return read(reader);
+        }
+    }
+
+    /**
+     * Reads the contents of the log file
+     *
+     * @return the log
+     * @throws FileNotFoundException if the log file does not exist
+     * @throws IOException           if an I/O error occurs
+     */
+    @ApiStatus.Internal
+    public String readContents(FilterList filters) throws IOException {
+        try (var reader = new LimitedReader(
+                this.getReader(),
+                filters.getMaxBytes(),
+                filters.getMaxLines(),
+                filters.getFilter(TrimFilter.class).isPresent()
+        )) {
             return read(reader);
         }
     }

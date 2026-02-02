@@ -5,12 +5,11 @@ import com.google.gson.GsonBuilder;
 import gs.mclo.api.data.LogField;
 import gs.mclo.api.internal.JsonBodyHandler;
 import gs.mclo.api.internal.RequestBuilder;
+import gs.mclo.api.internal.filter.*;
+import gs.mclo.api.internal.gson.FilterTypeAdapterFactory;
 import gs.mclo.api.internal.gson.InstantTypeAdapter;
 import gs.mclo.api.reader.FileLogReader;
-import gs.mclo.api.response.GetLogResponse;
-import gs.mclo.api.response.InsightsResponse;
-import gs.mclo.api.response.Limits;
-import gs.mclo.api.response.UploadLogResponse;
+import gs.mclo.api.response.*;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -27,6 +26,7 @@ import java.util.concurrent.CompletableFuture;
 public class MclogsClient {
     private final Gson gson = new GsonBuilder()
             .registerTypeAdapter(Instant.class, new InstantTypeAdapter())
+            .registerTypeAdapterFactory(new FilterTypeAdapterFactory())
             .create();
     private final HttpClient httpClient = HttpClient.newBuilder()
             .version(HttpClient.Version.HTTP_2)
@@ -35,6 +35,7 @@ public class MclogsClient {
 
     private Instance instance = new Instance();
     private @Nullable Limits limits;
+    private @Nullable FilterList filters;
     private final RequestBuilder requestBuilder = new RequestBuilder(gson);
 
     /**
@@ -143,13 +144,13 @@ public class MclogsClient {
      * @return the response
      */
     public CompletableFuture<UploadLogResponse> uploadLog(Log log) {
-        return getLimitsOrDefault().thenCompose(limits -> {
+        return getFiltersOrDefault().thenCompose(filters -> {
             if (log.getSource() == null) {
                 log.setSource(requestBuilder.getProjectName());
             }
 
             try {
-                HttpRequest request = requestBuilder.uploadRequest(instance.getLogUploadUrl(), log, limits);
+                HttpRequest request = requestBuilder.uploadRequest(instance.getLogUploadUrl(), log, filters);
                 return asyncRequest(request, UploadLogResponse.class);
             } catch (IOException e) {
                 return CompletableFuture.failedFuture(e);
@@ -211,9 +212,9 @@ public class MclogsClient {
      * @return the insights of the log
      */
     public CompletableFuture<InsightsResponse> analyseLog(Log log) {
-        return this.getLimitsOrDefault().thenCompose(limits -> {
+        return this.getFiltersOrDefault().thenCompose(filters -> {
             try {
-                HttpRequest request = requestBuilder.uploadRequest(instance.getLogAnalysisUrl(), log, limits);
+                HttpRequest request = requestBuilder.uploadRequest(instance.getLogAnalysisUrl(), log, filters);
                 return asyncRequest(request, InsightsResponse.class);
             } catch (IOException e) {
                 return CompletableFuture.failedFuture(e);
@@ -299,6 +300,29 @@ public class MclogsClient {
     }
 
     /**
+     * Get the filters that should be applied when uploading logs
+     *
+     * @return an array of filters
+     */
+    CompletableFuture<FilterList> getFilters() {
+        var filters = this.filters;
+        if (filters != null) {
+            return CompletableFuture.completedFuture(filters);
+        }
+
+        HttpRequest request = requestBuilder.request(instance.getFiltersUrl())
+                .header("Accept", "application/json")
+                .GET()
+                .build();
+        return asyncRequest(request, Filter[].class)
+                .thenApply(FilterList::new)
+                .thenApply(result -> {
+                    this.filters = result;
+                    return result;
+                });
+    }
+
+    /**
      * List logs in the {@code logs} subdirectory of a path
      *
      * @param directory server/client directory
@@ -330,6 +354,7 @@ public class MclogsClient {
 
     /**
      * List all files in a directory that match the allowed file name pattern
+     *
      * @param directory directory to list files from
      * @return array of file names that can be uploaded
      */
@@ -346,6 +371,7 @@ public class MclogsClient {
 
     /**
      * List all files in a directory that match the allowed file name pattern
+     *
      * @param directory directory to list files from
      * @return array of file names that can be uploaded
      */
@@ -368,8 +394,12 @@ public class MclogsClient {
                 .thenApply(HttpResponse::body);
     }
 
-    private CompletableFuture<Limits> getLimitsOrDefault() {
-        return this.getLimits().exceptionally(t -> Limits.DEFAULT);
+    private CompletableFuture<FilterList> getFiltersOrDefault() {
+        return this.getFilters().exceptionally(t -> new FilterList(new Filter[]{
+                new TrimFilter(),
+                new LimitBytesFilter(Limits.DEFAULT.getMaxLength()),
+                new LimitLinesFilter(Limits.DEFAULT.getMaxLines())
+        }));
     }
 
     @ApiStatus.Internal

@@ -1,3 +1,15 @@
+# v6.2.0
+
+## Improvements
+- Filter usernames and session tokens in uploaded logs as defined by the instance filters
+- Fix some requests hanging when their body is being read 
+- Trim beginning of logs before applying limits to avoid counting leading newlines and whitespace towards the limit
+
+## Deprecations
+- The pattern constants in `Log` are now deprecated and only serve as fallbacks when the filters endpoint is not available on the specified instance.
+- `Log#getContent(Limits)` is now deprecated. The new `getContent(FilterList)` method is internal and might change without notice.
+- `LogReader#readContents(Limits)` is now deprecated. The new `readContents(FilterList)` method is internal and might change without notice.
+
 # v6.1.0
 
 ## Improvements

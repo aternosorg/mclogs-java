@@ -51,7 +51,7 @@ public class LimitedReaderBenchmark extends ReaderBenchmark {
     }
 
     private int test(Reader in, Integer byteLimit, Integer lineLimit) throws IOException {
-        try (Reader reader = new LimitedReader(in, new Limits(1, byteLimit, lineLimit))) {
+        try (Reader reader = new LimitedReader(in, byteLimit, lineLimit, true)) {
             StringWriter writer = new StringWriter();
             reader.transferTo(writer);
             return writer.toString().length();

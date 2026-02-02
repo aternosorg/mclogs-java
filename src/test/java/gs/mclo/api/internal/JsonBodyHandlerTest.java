@@ -41,11 +41,10 @@ public class JsonBodyHandlerTest extends ApiTest {
     })
     public void testUnknownError(String body) {
         var handler = new JsonBodyHandler<>(client, UploadLogResponse.class);
-        var json = JsonParser.parseString(body);
 
         APIException exception = null;
         try {
-            handler.map(json, responseInfo);
+            handler.map(body, responseInfo);
         } catch (CompletionException e) {
             assert e.getCause() != null;
             assert e.getCause() instanceof APIException;
@@ -62,11 +61,10 @@ public class JsonBodyHandlerTest extends ApiTest {
     })
     public void testError(String body) {
         var handler = new JsonBodyHandler<>(client, UploadLogResponse.class);
-        var json = JsonParser.parseString(body);
 
         APIException exception = null;
         try {
-            handler.map(json, responseInfo);
+            handler.map(body, responseInfo);
         } catch (CompletionException e) {
             assert e.getCause() != null;
             assert e.getCause() instanceof APIException;
@@ -86,18 +84,16 @@ public class JsonBodyHandlerTest extends ApiTest {
     })
     public void testSuccess(String body) {
         var handler = new JsonBodyHandler<>(client, UploadLogResponse.class);
-        var json = JsonParser.parseString(body);
-        handler.map(json, responseInfo);
+        handler.map(body, responseInfo);
     }
 
     @Test
     public void testNotJsonObject() {
         var handler = new JsonBodyHandler<>(client, UploadLogResponse.class);
-        var json = JsonParser.parseString("1");
 
         APIException exception = null;
         try {
-            handler.map(json, responseInfo);
+            handler.map("1", responseInfo);
         } catch (CompletionException e) {
             assert e.getCause() != null;
             assert e.getCause() instanceof APIException;

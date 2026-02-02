@@ -1,28 +1,32 @@
 package gs.mclo.api;
 
 import gs.mclo.api.data.Metadata;
+import gs.mclo.api.internal.filter.*;
 import gs.mclo.api.reader.FileLogReader;
 import gs.mclo.api.reader.LogReader;
 import gs.mclo.api.reader.StringLogReader;
 import gs.mclo.api.response.Limits;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Log {
     /**
      * pattern for IPv4 addresses
      */
+    @Deprecated
     public static final Pattern IPV4_PATTERN = Pattern.compile("(?<!([0-9]|-|\\w))(?:[1-2]?[0-9]{1,2}\\.){3}[1-2]?[0-9]{1,2}(?!([0-9]|-|\\w))");
 
     /**
      * whitelist patterns for IPv4 addresses
      */
+    @Deprecated
     public static final Pattern[] IPV4_FILTER = new Pattern[]{
             Pattern.compile("127\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}"),
             Pattern.compile("0\\.0\\.0\\.0"),
@@ -33,11 +37,13 @@ public class Log {
     /**
      * pattern for IPv6 addresses
      */
+    @Deprecated
     public static final Pattern IPV6_PATTERN = Pattern.compile("(?<!([0-9]|-|\\w))(?:[0-9a-f]{0,4}:){7}[0-9a-f]{0,4}(?!([0-9]|-|\\w))", Pattern.CASE_INSENSITIVE);
 
     /**
      * whitelist patterns for IPv4 addresses
      */
+    @Deprecated
     public static final Pattern[] IPV6_FILTER = new Pattern[]{
             Pattern.compile("[0:]+1?"),
     };
@@ -87,84 +93,33 @@ public class Log {
     }
 
     /**
-     * remove IP addresses
+     * @return log content
      */
-    private String filter(String content) {
-        content = this.filterIPv4(content);
-        return this.filterIPv6(content);
-    }
-
-    /**
-     * remove IPv4 addresses
-     */
-    private String filterIPv4(String content) {
-        Matcher matcher = IPV4_PATTERN.matcher(content);
-        StringBuilder sb = new StringBuilder();
-        while (matcher.find()) {
-            if (isWhitelistedIPv4(matcher.group())) {
-                continue;
-            }
-            matcher.appendReplacement(sb, "**.**.**.**");
-        }
-        matcher.appendTail(sb);
-        return sb.toString();
-    }
-
-    /**
-     * does this IPv4 address match any whitelist filters
-     *
-     * @param s string to test
-     * @return matches
-     */
-    private boolean isWhitelistedIPv4(String s) {
-        for (Pattern filter : IPV4_FILTER) {
-            if (s.matches(filter.pattern())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * remove IPv6 addresses
-     */
-    private String filterIPv6(String content) {
-        Matcher matcher = IPV6_PATTERN.matcher(content);
-        StringBuilder sb = new StringBuilder();
-        while (matcher.find()) {
-            if (isWhitelistedIPv6(matcher.group())) {
-                continue;
-            }
-            matcher.appendReplacement(sb, "****:****:****:****:****:****:****:****");
-        }
-        matcher.appendTail(sb);
-        return sb.toString();
-    }
-
-    /**
-     * does this IPv6 address match any whitelist filters
-     *
-     * @param s string to test
-     * @return matches
-     */
-    private boolean isWhitelistedIPv6(String s) {
-        for (Pattern filter : IPV6_FILTER) {
-            if (s.matches(filter.pattern())) {
-                return true;
-            }
-        }
-        return false;
+    @Deprecated
+    public String getContent(Limits limits) throws IOException {
+        return getContent(new FilterList(new Filter[]{
+                new TrimFilter(),
+                new LimitBytesFilter(limits.getMaxLength()),
+                new LimitLinesFilter(limits.getMaxLines()),
+                legacyRegex(IPV4_PATTERN, IPV4_FILTER, "**.**.**.**"),
+                legacyRegex(IPV6_PATTERN, IPV6_FILTER, "****:****:****:****:****:****:****:****"),
+        }));
     }
 
     /**
      * @return log content
      */
-    public String getContent(Limits limits) throws IOException {
+    @ApiStatus.Internal
+    public String getContent(FilterList filters) throws IOException {
         if (content != null) {
             return content;
         }
 
-        this.content = this.filter(reader.readContents(limits));
+        content = reader.readContents(filters);
+        for (var filter : filters.getFilters()) {
+            content = filter.apply(content);
+        }
+
         return content;
     }
 
@@ -217,5 +172,11 @@ public class Log {
     public Log addMetadata(Metadata<?> data) {
         this.metadata.add(data);
         return this;
+    }
+
+    private RegexFilter legacyRegex(Pattern pattern, Pattern[] exemptions, String replacement) {
+        return new RegexFilter(new ReplacingRegexPattern[]{
+                new ReplacingRegexPattern(pattern.pattern(), new char[]{}, replacement),
+        }, Arrays.stream(exemptions).map(p -> new RegexPattern(p.pattern(), new char[]{})).toArray(RegexPattern[]::new));
     }
 }

@@ -93,6 +93,14 @@ public final class Instance {
         return apiBaseUrl + "1/log/" + id;
     }
 
+    /**
+     * Get the URL for fetching available filters
+     * @return the URL for fetching available filters (e.g. <a href="https://api.mclo.gs/1/filters">https://api.mclo.gs/1/filters</a>)
+     */
+    public String getFiltersUrl() {
+        return apiBaseUrl + "1/filters";
+    }
+
     private String ensureEndsWithSlash(String url) {
         if (!url.endsWith("/"))
             url += "/";

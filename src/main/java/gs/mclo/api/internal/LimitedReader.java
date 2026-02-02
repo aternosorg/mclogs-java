@@ -1,6 +1,5 @@
 package gs.mclo.api.internal;
 
-import gs.mclo.api.response.Limits;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -18,24 +17,33 @@ public final class LimitedReader extends Reader {
     @Nullable
     private Reader in;
     /**
+     * Whether to trim whitespace at the start of the log
+     */
+    private boolean trim;
+    /**
      * The remaining byte limit. If null, no limit is enforced.
      */
+    @Nullable
     private Integer remainingByteLimit;
     /**
      * The remaining line limit. If null, no limit is enforced.
      */
+    @Nullable
     private Integer remainingLineLimit;
 
     /**
      * Creates a new LimitedReader with the given limits.
      *
-     * @param in     the underlying reader
-     * @param limits the limits to enforce. If null, no limits are enforced.
+     * @param in        the underlying reader
+     * @param byteLimit the maximum number of bytes to read, or null for no limit
+     * @param lineLimit the maximum number of lines to read, or null for no limit
+     * @param trim      whether to trim whitespace at the start of the log
      */
-    public LimitedReader(Reader in, Limits limits) {
+    public LimitedReader(Reader in, @Nullable Integer byteLimit, @Nullable Integer lineLimit, boolean trim) {
         this.in = Objects.requireNonNull(in);
-        this.remainingByteLimit = limits.getMaxLength();
-        this.remainingLineLimit = limits.getMaxLines();
+        this.remainingByteLimit = byteLimit;
+        this.remainingLineLimit = lineLimit;
+        this.trim = trim;
     }
 
     @Override
@@ -52,27 +60,36 @@ public final class LimitedReader extends Reader {
             }
 
             int i = 0;
-            for (; i < read; i++) {
-                if (this.remainingByteLimit <= 0) {
-                    return i == 0 ? -1 : i;
+            for (int b = 0; i < read; i++) {
+                char c = readChars[b];
+                if (this.remainingByteLimit != null) {
+                    if (this.remainingByteLimit <= 0) {
+                        return i == 0 ? -1 : i;
+                    }
+
+                    var remainingByteLimit = this.remainingByteLimit;
+                    int byteCount = getPartialUTF8Size(c);
+                    if (this.getRemainingUTF8Size(c) > remainingByteLimit) {
+                        return i == 0 ? -1 : i;
+                    }
+                    this.remainingByteLimit -= byteCount;
                 }
 
-                char c = readChars[i];
-                var remainingByteLimit = this.remainingByteLimit;
-                int byteCount = getPartialUTF8Size(c);
-                if (this.getRemainingUTF8Size(c) > remainingByteLimit) {
-                    return i == 0 ? -1 : i;
-                }
-                this.remainingByteLimit -= byteCount;
-
-                if (c == '\n') {
+                if (c == '\n' && this.remainingLineLimit != null) {
                     this.remainingLineLimit--;
                     if (this.remainingLineLimit <= 0) {
                         return i == 0 ? -1 : i;
                     }
                 }
 
-                chars[offset + i] = c;
+                if (!trim || !Character.isWhitespace(c)) {
+                    chars[offset + i] = c;
+                    b++;
+                }
+
+                if (trim && !Character.isWhitespace(c)) {
+                    this.trim = false;
+                }
             }
 
             return i;

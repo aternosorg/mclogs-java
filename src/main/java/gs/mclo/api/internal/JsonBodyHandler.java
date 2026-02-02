@@ -1,11 +1,13 @@
 package gs.mclo.api.internal;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import gs.mclo.api.APIException;
 import gs.mclo.api.MclogsClient;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletionException;
 
 public final class JsonBodyHandler<T> implements HttpResponse.BodyHandler<T> {
@@ -19,15 +21,17 @@ public final class JsonBodyHandler<T> implements HttpResponse.BodyHandler<T> {
 
     @Override
     public HttpResponse.BodySubscriber<@Nullable T> apply(HttpResponse.ResponseInfo responseInfo) {
-        return HttpResponse.BodySubscribers.mapping(new JsonElementBodySubscriber(client.gson()), x -> map(x, responseInfo));
+        return HttpResponse.BodySubscribers.mapping(HttpResponse.BodySubscribers.ofString(StandardCharsets.UTF_8), x -> map(x, responseInfo));
     }
 
-    @Nullable T map(JsonElement element, HttpResponse.ResponseInfo responseInfo) {
-        if (!element.isJsonObject()) {
+    @Nullable T map(String json, HttpResponse.ResponseInfo responseInfo) {
+        var element = JsonParser.parseString(json);
+        if (element.isJsonObject()) {
+            checkError(element, responseInfo);
+        } else if (!element.isJsonArray()) {
             throw new CompletionException(new APIException("Invalid API response (Status code: " + responseInfo.statusCode() + ")", responseInfo.statusCode()));
         }
 
-        checkError(element, responseInfo);
 
         if (clazz == Void.class) {
             return null;

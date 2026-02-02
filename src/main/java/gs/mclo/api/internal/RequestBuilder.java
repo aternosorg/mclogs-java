@@ -3,7 +3,7 @@ package gs.mclo.api.internal;
 import com.google.gson.Gson;
 import gs.mclo.api.Log;
 import gs.mclo.api.internal.request.UploadLogRequestBody;
-import gs.mclo.api.response.Limits;
+import gs.mclo.api.internal.filter.FilterList;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -95,13 +95,13 @@ public final class RequestBuilder {
                 .header("User-Agent", this.getUserAgent());
     }
 
-    public HttpRequest uploadRequest(String url, Log log, Limits limits) throws IOException {
+    public HttpRequest uploadRequest(String url, Log log, FilterList filters) throws IOException {
         return request(url)
                 .header("Content-Type", "application/json")
                 .header("Content-Encoding", "gzip")
                 .header("Accept", "application/json")
                 .POST(CustomBodyPublishers.ofGzipString(gson.toJson(
-                        new UploadLogRequestBody(log.getContent(limits),
+                        new UploadLogRequestBody(log.getContent(filters),
                                 log.getSource(),
                                 log.getMetadata())))
                 )
