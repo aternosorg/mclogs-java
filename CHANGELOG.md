@@ -1,3 +1,8 @@
+# v6.2.1
+
+## Fixes
+- Fix "IllegalArgumentException: character to be escaped is missing" when sharing logs containing windows file paths
+
 # v6.2.0
 
 ## Improvements

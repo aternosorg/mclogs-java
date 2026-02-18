@@ -103,6 +103,7 @@ public class Log {
                 new LimitLinesFilter(limits.getMaxLines()),
                 legacyRegex(IPV4_PATTERN, IPV4_FILTER, "**.**.**.**"),
                 legacyRegex(IPV6_PATTERN, IPV6_FILTER, "****:****:****:****:****:****:****:****"),
+                legacyRegex(IPV6_PATTERN, IPV6_FILTER, "****:****:****:****:****:****:****:****"),
         }));
     }
 

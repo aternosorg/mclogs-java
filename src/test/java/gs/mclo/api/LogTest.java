@@ -63,6 +63,11 @@ public class LogTest extends ApiTest {
     }
 
     @Test
+    void windowsPath() {
+        assertEquals("C:\\Users\\********\\Desktop\\file.txt", filter("C:\\Users\\user\\Desktop\\file.txt"));
+    }
+
+    @Test
     void getContentCaches() {
         var testReader = new LogReader() {
             private boolean called = false;

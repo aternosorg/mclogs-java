@@ -2,6 +2,8 @@ package gs.mclo.api.internal.filter;
 
 import org.jetbrains.annotations.ApiStatus;
 
+import java.util.regex.Matcher;
+
 public final class RegexFilter implements Filter {
     private final ReplacingRegexPattern[] patterns;
     private final RegexPattern[] exemptions;
@@ -42,11 +44,9 @@ public final class RegexFilter implements Filter {
                         }
                     }
                 }
-                if (isExempted) {
-                    matcher.appendReplacement(result, matcher.group());
-                } else {
-                    matcher.appendReplacement(result, pattern.getReplacement());
-                }
+
+                String replacement = isExempted ? matcher.group() : pattern.getReplacement();
+                matcher.appendReplacement(result, Matcher.quoteReplacement(replacement));
             }
             matcher.appendTail(result);
             input = result.toString();
